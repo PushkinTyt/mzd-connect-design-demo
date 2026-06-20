@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mazda CMU — framework.sendEventToMmui() Reference</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0b0d; --surface: #111318; --border: #1e2330;
+    --text: #e2e8f0; --muted: #64748b; --accent: #22d3ee;
+    --blue: #3b82f6; --green: #22c55e; --amber: #f59e0b;
+  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; }
+  .layout { max-width: 980px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+  a.back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color .15s; }
+  a.back:hover { color: var(--text); }
+  .lang-switch { display: flex; gap: 4px; }
+  .lang-btn { background: #111318; border: 1px solid #1e2330; color: #64748b; font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .lang-btn.active { background: rgba(34,211,238,.1); border-color: var(--accent); color: var(--accent); }
+  .lang-btn:hover:not(.active) { border-color: #334155; color: #94a3b8; }
+  .hero h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.03em; color: #f8fafc; line-height: 1.2; margin-bottom: .6rem; }
+  .hero p { color: var(--muted); font-size: 0.9rem; margin-bottom: 2.5rem; }
+  code { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.82rem; background: #0d1117; border: 1px solid #1e2330; border-radius: 4px; padding: 1px 5px; color: var(--accent); }
+  pre { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.82rem; background: #0d1117; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; overflow-x: auto; color: #94a3b8; margin: 1rem 0 1.5rem; line-height: 1.6; }
+  pre .c { color: #475569; }
+  pre .k { color: var(--blue); }
+  pre .s { color: var(--green); }
+  pre .p { color: var(--amber); }
+  h2 { font-size: 1.12rem; font-weight: 600; color: #f1f5f9; margin: 2.8rem 0 .3rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 0.88rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .06em; margin: 1.6rem 0 .5rem; }
+  p { color: #94a3b8; font-size: 0.88rem; margin-bottom: .75rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: .5rem 0 1.5rem; }
+  th { background: #0d1117; color: #64748b; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: .07em; padding: .5rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: .55rem 1rem; border-bottom: 1px solid #161b27; color: #94a3b8; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.ev { color: #e2e8f0; font-family: 'JetBrains Mono','Fira Code',monospace; font-size: 0.79rem; white-space: nowrap; }
+  td.par { color: var(--green); font-family: 'JetBrains Mono','Fira Code',monospace; font-size: 0.76rem; }
+  td.desc { color: #94a3b8; }
+  td.used { color: #64748b; font-size: 0.8rem; font-style: italic; }
+  .toc { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2.5rem; }
+  .toc a { font-size: 0.79rem; color: #475569; text-decoration: none; background: #111318; border: 1px solid #1e2330; border-radius: 6px; padding: 4px 10px; transition: border-color .15s, color .15s; }
+  .toc a:hover { border-color: #334155; color: #94a3b8; }
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.78rem; color: #334155; }
+  footer a { color: #475569; text-decoration: none; }
+
+  /* i18n: по умолчанию RU видим, EN скрыт */
+  .en { display: none; }
+  html[lang="en"] .ru { display: none; }
+  html[lang="en"] .en { display: revert; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<div class="topbar">
+  <a class="back" href="index.html">← <span class="ru">На главную</span><span class="en">Back to index</span></a>
+  <div class="lang-switch">
+    <button class="lang-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+</div>
+
+<div class="hero">
+  <h1>framework.sendEventToMmui() Reference</h1>
+  <p class="ru">Mazda Connect CMU · Прошивка v70/v74 · Извлечено из исходников <code>/jci/gui/</code></p>
+  <p class="en">Mazda Connect CMU · Firmware v70/v74 · Extracted from <code>/jci/gui/</code> source</p>
+</div>
+
+<div class="toc">
+  <a href="#signature"><span class="ru">Сигнатура</span><span class="en">Signature</span></a>
+  <a href="#common">common — Global.*</a>
+  <a href="#system">system</a>
+  <a href="#diag">diag</a>
+  <a href="#syssettings">syssettings</a>
+  <a href="#audiosettings">audiosettings</a>
+  <a href="#vehsettings">vehsettings</a>
+  <a href="#schedmaint">schedmaint</a>
+  <a href="#phone">phone / contacts / sms / email / btpairing</a>
+  <a href="#media">media</a>
+  <a href="#radio">radio</a>
+  <a href="#xmdata">xmdata</a>
+  <a href="#vdt">vdt</a>
+  <a href="#navi">emnavi</a>
+  <a href="#uiaId">uiaId <span class="ru">— маппинг</span><span class="en">— mapping</span></a>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="signature"><span class="ru">Сигнатура</span><span class="en">Signature</span></h2>
+
+<pre><span class="k">framework</span>.sendEventToMmui(component, eventName, params, vuiFlag)
+
+<span class="c ru">// component  — строка: "common", "system", или this.uiaId (имя приложения)</span>
+<span class="c en">// component  — string: "common", "system", or this.uiaId (app name)</span>
+<span class="c ru">// eventName  — строка: идентификатор события</span>
+<span class="c en">// eventName  — string: event identifier</span>
+<span class="c ru">// params     — объект: { payload: { ... } }  или null / не передавать</span>
+<span class="c en">// params     — object: { payload: { ... } }  or null / omit</span>
+<span class="c ru">// vuiFlag    — boolean: true = вызвано голосом (VUI), по умолчанию false</span>
+<span class="c en">// vuiFlag    — boolean: true = triggered by voice (VUI), omit = false</span>
+
+<span class="c">// WebSocket → ws://127.0.0.1:2700  protocol: ihu-guiifm-protocol</span>
+{
+  <span class="s">"msgType"</span>:          <span class="s">"event"</span>,
+  <span class="s">"uiaId"</span>:            component,
+  <span class="s">"eventId"</span>:          eventName,
+  <span class="s">"params"</span>:           params || {},
+  <span class="s">"fromVui"</span>:          vuiFlag || <span class="k">false</span>,
+  <span class="s">"currentUiaId"</span>:     <span class="s">""</span>,
+  <span class="s">"currentContextId"</span>: <span class="s">""</span>
+}</pre>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="common">component: <code>"common"</code> — Global.*</h2>
+<p class="ru">Универсальные события, понимаемые любым приложением. Работают из любого контекста GUI.</p>
+<p class="en">Universal events understood by every app. Can be sent regardless of current context.</p>
+
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние · Где используется</th><th class="en">Description · Effect · Usage</th></tr>
+  <tr>
+    <td class="ev">Global.GetStartupSettings</td><td class="par">—</td>
+    <td class="desc ru">Запускает инициализацию GUI. MMUI отвечает переходом в контекст <code>Applications</code> / <code>HomeScreen</code>. Вызывается автоматически при старте <code>GuiFramework.init()</code> через <code>_getStartupSettings()</code>.</td>
+    <td class="desc en">Bootstraps GUI. MMUI responds with ctxtChg → <code>Applications</code> / <code>HomeScreen</code>. Called automatically on <code>GuiFramework.init()</code>.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.InitGui</td><td class="par">—</td>
+    <td class="desc ru">Альтернативный триггер инициализации. Вызывается если <code>GetStartupSettings</code> уже был обработан, но GUI ещё не отрисован.</td>
+    <td class="desc en">Alternative init trigger. Used when startup settings are already loaded but GUI is not yet rendered.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.IntentHome</td><td class="par">—</td>
+    <td class="desc ru">Переход на главный экран (<code>HomeScreen</code>). Сбрасывает стек навигации. Используется кнопкой «Home» на рулевом колесе и в любом приложении для возврата в главное меню.</td>
+    <td class="desc en">Navigate to <code>HomeScreen</code>, clears nav stack. Triggered by the steering wheel Home button and any app's "go home" action.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.GoBack</td><td class="par">—</td>
+    <td class="desc ru">Шаг назад в стеке навигации. Каждое приложение регистрирует обработчик — MMUI отправляет предыдущий контекст. Используется кнопкой «Back» и жестом назад на мультиконтроллере.</td>
+    <td class="desc en">One step back in the navigation stack. MMUI pops the context stack and sends the previous context. Triggered by the Back button / multicontroller.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.Cancel</td><td class="par">—</td>
+    <td class="desc ru">Отмена текущего диалога или ввода. Закрывает popup без применения изменений. Аналог кнопки «Отмена».</td>
+    <td class="desc en">Cancel current dialog / input without applying changes. Equivalent of the Cancel button in any popup.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.Yes</td><td class="par">—</td>
+    <td class="desc ru">Подтверждение в диалоге. Применяет действие (удаление, сброс, отправка). Используется во всех подтверждающих диалогах.</td>
+    <td class="desc en">Confirm action in dialog (delete, reset, send). Used in all confirmation dialogs.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.No</td><td class="par">—</td>
+    <td class="desc ru">Отклонение в диалоге. Закрывает диалог без действия.</td>
+    <td class="desc en">Dismiss dialog without action.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.Play</td><td class="par">—</td>
+    <td class="desc ru">Начать воспроизведение. Все медиаприложения слушают это событие через общий контроллер.</td>
+    <td class="desc en">Start playback. All media apps handle this via the common media controller.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.Pause</td><td class="par">—</td>
+    <td class="desc ru">Приостановить воспроизведение. Активное медиаприложение реагирует на паузу. Есть задержка 250 мс в некоторых приложениях.</td>
+    <td class="desc en">Pause playback. Active media app responds. Some apps apply a 250 ms debounce.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.Resume</td><td class="par">—</td>
+    <td class="desc ru">Возобновить воспроизведение после паузы. Аналогично Pause — 250 мс debounce в некоторых приложениях.</td>
+    <td class="desc en">Resume playback after pause.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.Next</td><td class="par">—</td>
+    <td class="desc ru">Следующий трек / элемент. Вызывается кнопкой «⏭» на рулевом колесе или мультиконтроллере.</td>
+    <td class="desc en">Next track / item. Triggered by the skip-forward button on the steering wheel.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.Previous</td><td class="par">—</td>
+    <td class="desc ru">Предыдущий трек / элемент. Короткое нажатие кнопки «⏮».</td>
+    <td class="desc en">Previous track / item. Short press of the skip-back button.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.NextHoldStart</td><td class="par">—</td>
+    <td class="desc ru">Удержание кнопки «Следующий» — начало режима перемотки вперёд. Приложение переключается в FF-режим пока не придёт <code>NextHoldStop</code>.</td>
+    <td class="desc en">Long-press next → fast-forward mode start. App enters FF until <code>NextHoldStop</code> arrives.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.NextHoldStop</td><td class="par">—</td>
+    <td class="desc ru">Отпускание после удержания «Следующий» — конец перемотки вперёд.</td>
+    <td class="desc en">Release after long-press next → end fast-forward.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.PreviousHoldStart</td><td class="par">—</td>
+    <td class="desc ru">Удержание кнопки «Предыдущий» — начало режима перемотки назад (RW).</td>
+    <td class="desc en">Long-press previous → rewind mode start.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.PreviousHoldStop</td><td class="par">—</td>
+    <td class="desc ru">Отпускание после удержания «Предыдущий» — конец перемотки назад.</td>
+    <td class="desc en">Release after long-press previous → end rewind.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.FastForward</td><td class="par">—</td>
+    <td class="desc ru">Быстрая перемотка вперёд (используется голосовыми командами VUI или рулевым колесом без удержания).</td>
+    <td class="desc en">Fast-forward. Used by VUI voice commands or steering-wheel without hold.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.Rewind</td><td class="par">—</td>
+    <td class="desc ru">Быстрая перемотка назад.</td>
+    <td class="desc en">Rewind.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.AddToFavorites</td><td class="par">—</td>
+    <td class="desc ru">Добавить текущий элемент в «Избранное». Радиостанция, контакт или POI-точка навигации. Приложение сохраняет текущий контекст в список избранного.</td>
+    <td class="desc en">Bookmark current item (radio station, contact, nav POI). App saves the current context item to the Favorites list.</td>
+  </tr>
+  <tr>
+    <td class="ev">Global.IntentSettingsTab</td>
+    <td class="par"><code>{ payload: { settingsTab: "…" } }</code></td>
+    <td class="desc ru">Открыть конкретную вкладку настроек. MMUI переключает контекст на нужный раздел без прохождения через главное меню. Используется из любого приложения для перехода в настройки.</td>
+    <td class="desc en">Open a specific Settings tab directly. MMUI routes to the target section without going through the main menu. Used cross-app to jump into settings.</td>
+  </tr>
+</table>
+
+<h3><span class="ru">Значения settingsTab</span><span class="en">settingsTab values</span></h3>
+<table>
+  <tr><th>settingsTab</th><th>uiaId</th><th><span class="ru">Контекст</span><span class="en">Context</span></th><th class="ru">Что открывает</th><th class="en">Opens</th></tr>
+  <tr><td class="ev">"Display"</td><td class="par">syssettings</td><td class="par">DisplayTab</td><td class="desc ru">Яркость, контраст, цвет, тема день/ночь</td><td class="desc en">Brightness, contrast, colour, day/night theme</td></tr>
+  <tr><td class="ev">"Sound"</td><td class="par">audiosettings</td><td class="par">SoundTab</td><td class="desc ru">Громкость звонка, рингтон, голосовые подсказки</td><td class="desc en">Call volume, ringtone, voice guidance</td></tr>
+  <tr><td class="ev">"Clock"</td><td class="par">syssettings</td><td class="par">ClockTab</td><td class="desc ru">Формат времени, часовой пояс, летнее время</td><td class="desc en">Time format, timezone, daylight saving</td></tr>
+  <tr><td class="ev">"Safety"</td><td class="par">vehsettings</td><td class="par">SafetyTab</td><td class="desc ru">Системы активной безопасности (SBS, BSM, LAS, LDW)</td><td class="desc en">Active safety systems (SBS, BSM, LAS, LDW)</td></tr>
+  <tr><td class="ev">"Vehicle"</td><td class="par">vehsettings</td><td class="par">VehicleSettingsTab</td><td class="desc ru">Замки, освещение, HUD, парковочные функции</td><td class="desc en">Door locks, lighting, HUD, parking functions</td></tr>
+  <tr><td class="ev">"Devices"</td><td class="par">syssettings</td><td class="par">DevicesTab</td><td class="desc ru">Bluetooth-устройства, CarPlay, Android Auto</td><td class="desc en">Bluetooth devices, CarPlay, Android Auto</td></tr>
+  <tr><td class="ev">"System"</td><td class="par">syssettings</td><td class="par">SystemTab</td><td class="desc ru">Язык, версия ПО, сброс к заводским настройкам</td><td class="desc en">Language, software version, factory reset</td></tr>
+</table>
+
+<pre><span class="c ru">// Примеры:</span><span class="c en">// Examples:</span>
+framework.sendEventToMmui(<span class="s">"common"</span>, <span class="s">"Global.IntentHome"</span>);
+framework.sendEventToMmui(<span class="s">"common"</span>, <span class="s">"Global.GoBack"</span>);
+framework.sendEventToMmui(<span class="s">"common"</span>, <span class="s">"Global.IntentSettingsTab"</span>, { <span class="p">payload</span>: { <span class="p">settingsTab</span>: <span class="s">"Display"</span> } });
+framework.sendEventToMmui(<span class="s">"common"</span>, <span class="s">"Global.IntentSettingsTab"</span>, { <span class="p">payload</span>: { <span class="p">settingsTab</span>: <span class="s">"Sound"</span>  } });
+framework.sendEventToMmui(<span class="s">"common"</span>, <span class="s">"Global.Yes"</span>);
+framework.sendEventToMmui(<span class="s">"common"</span>, <span class="s">"Global.Cancel"</span>);</pre>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="system">component: <code>"system"</code></h2>
+<p class="ru">Системный MMUI-контроллер. Управляет главным меню и жизненным циклом приложений.</p>
+<p class="en">System-level MMUI controller. Handles main menu navigation and app lifecycle.</p>
+
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr>
+    <td class="ev">SelectApplications</td><td class="par">—</td>
+    <td class="desc ru">Переход на главный экран «Все приложения». Отображает сетку иконок приложений. Используется кнопкой Home на панели.</td>
+    <td class="desc en">Go to main Applications grid. Used by the Home button on the panel.</td>
+  </tr>
+  <tr>
+    <td class="ev">SelectEntertainment</td><td class="par">—</td>
+    <td class="desc ru">Открыть раздел «Развлечения» — радио, медиаплееры, стриминг.</td>
+    <td class="desc en">Open Entertainment section — radio, media players, streaming.</td>
+  </tr>
+  <tr>
+    <td class="ev">SelectCommunication</td><td class="par">—</td>
+    <td class="desc ru">Открыть раздел «Связь» — телефон, контакты, SMS, email.</td>
+    <td class="desc en">Open Communication section — phone, contacts, SMS, email.</td>
+  </tr>
+  <tr>
+    <td class="ev">SelectNavigation</td><td class="par">—</td>
+    <td class="desc ru">Открыть раздел «Навигация».</td>
+    <td class="desc en">Open Navigation section.</td>
+  </tr>
+  <tr>
+    <td class="ev">SelectSettings</td><td class="par">—</td>
+    <td class="desc ru">Открыть корень настроек. MMUI переключается на первую вкладку (Display).</td>
+    <td class="desc en">Open Settings root. MMUI switches to the first tab (Display).</td>
+  </tr>
+  <tr>
+    <td class="ev">NotifyDisclaimerEnd</td><td class="par">—</td>
+    <td class="desc ru">Закрыть заставку-дисклеймер при запуске. GUI отправляет это событие после того, как пользователь принял предупреждение.</td>
+    <td class="desc en">Dismiss startup disclaimer. GUI sends this after the user acknowledges the safety warning.</td>
+  </tr>
+  <tr>
+    <td class="ev">DisposeIntroVideo</td><td class="par">—</td>
+    <td class="desc ru">Остановить и скрыть вступительный видеоролик Mazda при загрузке.</td>
+    <td class="desc en">Stop and hide the Mazda intro video played during boot.</td>
+  </tr>
+  <tr>
+    <td class="ev">DisplayOffGUIActivity</td><td class="par">—</td>
+    <td class="desc ru">Уведомить MMUI о том, что экран был выключен. Позволяет сервисам правильно обработать переход в режим ожидания.</td>
+    <td class="desc en">Notify MMUI that the display was turned off, allowing services to handle sleep state correctly.</td>
+  </tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="diag">component: <code>"diag"</code></h2>
+<p class="ru">Диагностическое приложение. Работает через DBus-сервис <code>com.jci.testdiag</code> (<code>svcjcitestdiag.so</code>).</p>
+<p class="en">Diagnostic app. Communicates via DBus service <code>com.jci.testdiag</code> (<code>svcjcitestdiag.so</code>).</p>
+
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr>
+    <td class="ev">ReadDTC</td>
+    <td class="par"><code>{ payload: { testId: &lt;n&gt; } }</code></td>
+    <td class="desc ru">Запустить диагностический тест по ID. <code>svcjcitestdiag.so</code> вызывает <code>system("/jci/scripts/startSystemScripts.sh &lt;testId&gt;")</code>, что запускает <code>jci-systemDialog</code> — оверлейное меню с диагностическими инструментами. <b>testId=11</b> — подтверждён на v74.</td>
+    <td class="desc en">Run diagnostic test by ID. <code>svcjcitestdiag.so</code> calls <code>system("/jci/scripts/startSystemScripts.sh &lt;testId&gt;")</code>, launching <code>jci-systemDialog</code> overlay. <b>testId=11</b> confirmed on v74.</td>
+  </tr>
+  <tr>
+    <td class="ev">ClearDTC</td><td class="par">—</td>
+    <td class="desc ru">Очистить коды неисправностей (DTC). Стирает диагностические ошибки из памяти ЭБУ через DBus.</td>
+    <td class="desc en">Clear stored Diagnostic Trouble Codes from ECU memory via DBus.</td>
+  </tr>
+  <tr>
+    <td class="ev">DiagLoaded</td><td class="par">—</td>
+    <td class="desc ru">GUI уведомляет MMUI, что экран диагностики загрузился и готов принимать данные.</td>
+    <td class="desc en">GUI notifies MMUI that the diagnostics screen has loaded and is ready for data.</td>
+  </tr>
+  <tr>
+    <td class="ev">ActivateJCITest</td><td class="par">—</td>
+    <td class="desc ru">Войти в режим JCI-тестирования. Активирует расширенные диагностические функции производителя.</td>
+    <td class="desc en">Enter JCI factory test mode. Activates extended manufacturer diagnostic functions.</td>
+  </tr>
+  <tr>
+    <td class="ev">DeactivateJCITest</td><td class="par">—</td>
+    <td class="desc ru">Выйти из режима JCI-тестирования.</td>
+    <td class="desc en">Exit JCI factory test mode.</td>
+  </tr>
+  <tr>
+    <td class="ev">EndTest</td><td class="par">—</td>
+    <td class="desc ru">Завершить текущий активный тест.</td>
+    <td class="desc en">End the current active test.</td>
+  </tr>
+  <tr>
+    <td class="ev">Deactivation</td><td class="par">—</td>
+    <td class="desc ru">Завершить сеанс диагностики, освободить ресурсы.</td>
+    <td class="desc en">Close the diagnostics session and release resources.</td>
+  </tr>
+</table>
+
+<pre><span class="c ru">// testId=11 вызывает jci-systemDialog с меню инструментов разработчика:</span>
+<span class="c en">// testId=11 launches jci-systemDialog with developer tools menu:</span>
+framework.sendEventToMmui(<span class="s">"diag"</span>, <span class="s">"ReadDTC"</span>, { <span class="p">payload</span>: { <span class="p">testId</span>: 11 } });
+framework.sendEventToMmui(<span class="s">"diag"</span>, <span class="s">"ClearDTC"</span>);</pre>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="syssettings">component: <code>"syssettings"</code></h2>
+<p class="ru">Системные настройки — дисплей, часы, язык, единицы, подключённые устройства, версия ПО.</p>
+<p class="en">System settings — display, clock, language, units, devices, software version.</p>
+
+<h3>Display — <span class="ru">настройки экрана</span><span class="en">Display settings</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetBrightness</td><td class="par">—</td><td class="desc ru">Открыть экран управления яркостью дисплея.</td><td class="desc en">Open display brightness control screen.</td></tr>
+  <tr><td class="ev">SetBrightnessValue</td><td class="par"><code>{ payload: { value: 0–100 } }</code></td><td class="desc ru">Задать уровень яркости программно. Применяется немедленно — используется слайдером яркости.</td><td class="desc en">Set display brightness programmatically. Applied immediately — used by the brightness slider.</td></tr>
+  <tr><td class="ev">SetContrast</td><td class="par">—</td><td class="desc ru">Открыть экран настройки контрастности.</td><td class="desc en">Open contrast settings screen.</td></tr>
+  <tr><td class="ev">SetContrastValue</td><td class="par"><code>{ payload: { value: 0–100 } }</code></td><td class="desc ru">Задать уровень контрастности дисплея.</td><td class="desc en">Set display contrast level.</td></tr>
+  <tr><td class="ev">SetColorValue</td><td class="par"><code>{ payload: { value: 0–100 } }</code></td><td class="desc ru">Насыщенность цвета. 0 = монохромный, 100 = максимум.</td><td class="desc en">Colour saturation. 0 = monochrome, 100 = maximum.</td></tr>
+  <tr><td class="ev">SetTintValue</td><td class="par"><code>{ payload: { value: 0–100 } }</code></td><td class="desc ru">Оттенок (tint) дисплея.</td><td class="desc en">Display tint level.</td></tr>
+  <tr><td class="ev">SetDayNightAuto</td><td class="par"><code>{ payload: { mode: "auto"|"day"|"night" } }</code></td><td class="desc ru">Режим дня/ночи. <code>auto</code> — по датчику освещённости; <code>day</code>/<code>night</code> — принудительно. Влияет на цветовую схему всего GUI.</td><td class="desc en">Day/Night mode. <code>auto</code> = ambient sensor; <code>day</code>/<code>night</code> = forced. Affects the entire GUI colour scheme.</td></tr>
+  <tr><td class="ev">SetToolTips</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Показывать/скрывать всплывающие подсказки в интерфейсе.</td><td class="desc en">Show/hide UI tooltips.</td></tr>
+  <tr><td class="ev">SelectDisplayReset</td><td class="par">—</td><td class="desc ru">Сбросить настройки дисплея (яркость, контраст, цвет, tint) к заводским.</td><td class="desc en">Reset display settings (brightness, contrast, colour, tint) to factory defaults.</td></tr>
+  <tr><td class="ev">SelectDisplayInformation</td><td class="par">—</td><td class="desc ru">Открыть информационный экран дисплея (разрешение, версия панели, калибровка).</td><td class="desc en">Open display info screen (resolution, panel version, calibration).</td></tr>
+  <tr><td class="ev">DisplaySetResetFailure</td><td class="par">—</td><td class="desc ru">GUI уведомляет MMUI об ошибке сброса настроек дисплея.</td><td class="desc en">GUI notifies MMUI that display settings reset failed.</td></tr>
+  <tr><td class="ev">DisplaySetResetSuccess</td><td class="par">—</td><td class="desc ru">GUI уведомляет MMUI об успешном сбросе настроек дисплея.</td><td class="desc en">GUI notifies MMUI that display settings reset succeeded.</td></tr>
+</table>
+
+<h3>Clock / Time — <span class="ru">часы и время</span><span class="en">Clock &amp; Time</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SelectSetClock</td><td class="par">—</td><td class="desc ru">Открыть экран настройки часов.</td><td class="desc en">Open clock setup screen.</td></tr>
+  <tr><td class="ev">SetTimeFormat</td><td class="par"><code>{ payload: { timeFormat: "12h"|"24h" } }</code></td><td class="desc ru">Переключить 12/24-часовой формат. Влияет на строку времени в статус-баре и на экране часов.</td><td class="desc en">Toggle 12h / 24h format. Affects time string in status bar and clock screen.</td></tr>
+  <tr><td class="ev">SetDateFormat</td><td class="par"><code>{ payload: { dateFormat: "…" } }</code></td><td class="desc ru">Формат даты: DD/MM/YYYY, MM/DD/YYYY, YYYY/MM/DD и т.д.</td><td class="desc en">Date format: DD/MM/YYYY, MM/DD/YYYY, YYYY/MM/DD, etc.</td></tr>
+  <tr><td class="ev">SetTime</td><td class="par"><code>u32 timestamp</code></td><td class="desc ru">Установить системное время (Unix timestamp, uint32). Используется при ручной настройке или GPS-синхронизации.</td><td class="desc en">Set system time (Unix timestamp, uint32). Used for manual set or GPS sync.</td></tr>
+  <tr><td class="ev">SetTimeZone</td><td class="par"><code>{ payload: { timeZone: "…" } }</code></td><td class="desc ru">Установить часовой пояс. MMUI пересчитывает отображаемое время.</td><td class="desc en">Set timezone. MMUI recalculates the displayed time.</td></tr>
+  <tr><td class="ev">SetDaylightSavingTime</td><td class="par"><code>{ payload: { dst: true|false } }</code></td><td class="desc ru">Летнее время (DST) — сдвигает отображаемое время на ±1 час.</td><td class="desc en">Daylight Saving Time (DST) — shifts displayed time by ±1 hour.</td></tr>
+  <tr><td class="ev">SetGpsSync</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автосинхронизация часов по GPS. При включении время обновляется от навигационного сигнала автоматически.</td><td class="desc en">GPS clock auto-sync. When on, time is updated automatically from the navigation signal.</td></tr>
+</table>
+
+<h3>Language / Region / Units — <span class="ru">язык и единицы измерения</span><span class="en">Language &amp; Units</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetLanguage</td><td class="par"><code>{ payload: { language: "en_US"|"ru_RU"|… } }</code></td><td class="desc ru">Сменить язык интерфейса GUI. MMUI перезагружает строки локализации без перезапуска системы.</td><td class="desc en">Change GUI language. MMUI reloads localization strings without system restart.</td></tr>
+  <tr><td class="ev">SelectLanguageConf</td><td class="par">—</td><td class="desc ru">Открыть экран подтверждения смены языка (диалог «применить?»).</td><td class="desc en">Open language change confirmation dialog.</td></tr>
+  <tr><td class="ev">ShowNewLanguage</td><td class="par">—</td><td class="desc ru">Отобразить интерфейс на только что выбранном языке для предпросмотра перед подтверждением.</td><td class="desc en">Preview the newly selected language in the UI before confirming.</td></tr>
+  <tr><td class="ev">SelectKeyboardLanguage</td><td class="par">—</td><td class="desc ru">Открыть экран выбора языка экранной клавиатуры.</td><td class="desc en">Open on-screen keyboard language selection screen.</td></tr>
+  <tr><td class="ev">GUILanguageChangeStatus</td><td class="par"><code>{ payload: { changeStatus: "Success"|"Failure" } }</code></td><td class="desc ru">GUI сообщает MMUI результат загрузки новых строк локализации.</td><td class="desc en">GUI reports localization reload result to MMUI.</td></tr>
+  <tr><td class="ev">SetUnitsDistance</td><td class="par"><code>{ payload: { units: "km"|"mi" } }</code></td><td class="desc ru">Единицы расстояния — километры или мили. Влияет на навигацию, пробег и спидометр.</td><td class="desc en">Distance units — km or miles. Affects navigation, odometer and speedometer display.</td></tr>
+  <tr><td class="ev">SetUnitsTemperature</td><td class="par"><code>{ payload: { units: "C"|"F" } }</code></td><td class="desc ru">Единицы температуры — Цельсий или Фаренгейт. Влияет на климат и внешнюю температуру.</td><td class="desc en">Temperature units — Celsius or Fahrenheit. Affects climate and outside temperature display.</td></tr>
+</table>
+
+<h3>Devices — <span class="ru">подключённые устройства</span><span class="en">Connected Devices</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetAppleCarPlay</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Включить/выключить Apple CarPlay. При включении iPhone подключается как CarPlay-проекция.</td><td class="desc en">Enable/disable Apple CarPlay. When on, iPhone connects as a CarPlay projection.</td></tr>
+  <tr><td class="ev">SetAndroidAuto</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Включить/выключить Android Auto. Перезапускает службы подключения.</td><td class="desc en">Enable/disable Android Auto. Restarts connection services.</td></tr>
+  <tr><td class="ev">SetAutoDownloadContacts</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автозагрузка контактов при подключении телефона по Bluetooth.</td><td class="desc en">Auto-download contacts when phone connects via Bluetooth.</td></tr>
+  <tr><td class="ev">SetAutoDownloadCallHistory</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автозагрузка журнала вызовов с телефона по Bluetooth.</td><td class="desc en">Auto-download call history from phone via Bluetooth.</td></tr>
+  <tr><td class="ev">SetAutoDownloadText</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автозагрузка SMS с телефона (требуется Bluetooth MAP-профиль).</td><td class="desc en">Auto-download SMS messages from phone (requires Bluetooth MAP profile).</td></tr>
+  <tr><td class="ev">SetAutoDownloadEmail</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автозагрузка email с телефона по Bluetooth.</td><td class="desc en">Auto-download email from phone via Bluetooth.</td></tr>
+  <tr><td class="ev">SetMobileEmergencyNumber</td><td class="par"><code>{ payload: { number: "…" } }</code></td><td class="desc ru">Установить номер экстренного вызова для функции <code>mobile911</code> (eCall).</td><td class="desc en">Set emergency call number for the <code>mobile911</code> eCall feature.</td></tr>
+  <tr><td class="ev">SelectVersion</td><td class="par">—</td><td class="desc ru">Открыть экран с версией прошивки CMU, серийным номером и Build ID.</td><td class="desc en">Open firmware version screen showing CMU version, serial number and Build ID.</td></tr>
+</table>
+
+<h3>VR / Voice — <span class="ru">голосовой ассистент</span><span class="en">Voice Assistant</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">Set_VR_Example</td><td class="par"><code>{ payload: { … } }</code></td><td class="desc ru">Конфигурация VR-движка распознавания речи. Отправляется при изменении настроек голосового ассистента в syssettings.</td><td class="desc en">VR speech recognition engine configuration. Sent when changing voice recognition settings in syssettings.</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="audiosettings">component: <code>"audiosettings"</code></h2>
+<p class="ru">Настройки звука — эквалайзер, громкость, система Bose, сигналы. Параметры эквалайзера передаются через динамическое поле <code>appData</code>: элемент списка настроек содержит поле <code>appData</code>, которое используется как <code>eventName</code> в <code>sendEventToMmui()</code>.</p>
+<p class="en">Audio settings — equaliser, volume, Bose system, beeps. EQ parameters use a dynamic <code>appData</code> field: each settings list item has an <code>appData</code> field that is passed as the <code>eventName</code> in <code>sendEventToMmui()</code>.</p>
+
+<h3>Equalizer — <span class="ru">эквалайзер</span><span class="en">Equaliser</span></h3>
+<table>
+  <tr><th>eventName (appData)</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">audioBass</td><td class="par"><code>{ payload: { value: -7…+7 } }</code></td><td class="desc ru">Уровень низких частот (бас). Диапазон ±7 ступеней. Слайдер передаёт <code>appData: 'audioBass'</code> как имя события.</td><td class="desc en">Bass (low frequency) level. Range ±7 steps. Slider passes <code>appData: 'audioBass'</code> as event name.</td></tr>
+  <tr><td class="ev">audioTreble</td><td class="par"><code>{ payload: { value: -7…+7 } }</code></td><td class="desc ru">Уровень высоких частот (ВЧ). Диапазон ±7.</td><td class="desc en">Treble (high frequency) level. Range ±7.</td></tr>
+  <tr><td class="ev">audioFader</td><td class="par"><code>{ payload: { value: -7…+7 } }</code></td><td class="desc ru">Баланс фронт/тыл. Отрицательное = тыловые динамики преобладают, положительное = передние.</td><td class="desc en">Front/rear fader. Negative = rear speakers dominate, positive = front.</td></tr>
+  <tr><td class="ev">audioBalance</td><td class="par"><code>{ payload: { value: -7…+7 } }</code></td><td class="desc ru">Баланс лево/право. Отрицательное = левые динамики, положительное = правые.</td><td class="desc en">Left/right balance. Negative = left speakers, positive = right.</td></tr>
+</table>
+
+<h3>Volume — <span class="ru">громкость</span><span class="en">Volume</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">audioAutoVolume</td><td class="par"><code>{ payload: { level: 0–3 } }</code></td><td class="desc ru">Автоматическая регулировка громкости по скорости (Speed-Sensitive Volume). 0=выкл, 1=низкий, 2=средний, 3=высокий уровень компенсации шума дороги.</td><td class="desc en">Speed-Sensitive Volume compensation. 0=off, 1=low, 2=medium, 3=high road noise compensation level.</td></tr>
+  <tr><td class="ev">SetAudioAutoVolume</td><td class="par"><code>{ payload: { level: 0–3 } }</code></td><td class="desc ru">Альтернативный прямой вызов для автогромкости (Set*-форма, без паттерна appData).</td><td class="desc en">Alternative direct Set* call for auto volume (not using the appData pattern).</td></tr>
+  <tr><td class="ev">audioGuidanceVol</td><td class="par"><code>{ payload: { volume: 0–10 } }</code></td><td class="desc ru">Громкость голосовых подсказок навигации и VR-ассистента. Независимая от основной громкости.</td><td class="desc en">Navigation voice guidance and VR assistant volume. Independent from main media volume.</td></tr>
+  <tr><td class="ev">SetCallVolume</td><td class="par"><code>{ payload: { volume: 0–30 } }</code></td><td class="desc ru">Громкость hands-free разговора. Влияет только на телефонные звонки, не на медиа.</td><td class="desc en">Hands-free call volume. Affects phone calls only, not media audio.</td></tr>
+  <tr><td class="ev">SetVoiceGuidanceRingVolume</td><td class="par"><code>{ payload: { volume: 0–30 } }</code></td><td class="desc ru">Громкость входящего звонка при активной навигации.</td><td class="desc en">Incoming call ring volume during active navigation.</td></tr>
+  <tr><td class="ev">SetRingtone</td><td class="par"><code>{ payload: { ringtone: "…" } }</code></td><td class="desc ru">Выбрать рингтон для входящих Bluetooth-вызовов из предустановленного набора.</td><td class="desc en">Select ringtone for incoming Bluetooth calls from the preset set.</td></tr>
+</table>
+
+<h3>Bose — <span class="ru">система Bose</span><span class="en">Bose System</span></h3>
+<table>
+  <tr><th>eventName (appData)</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">audioCenterpoint</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Bose Centerpoint® — виртуальный объёмный звук из стерео-контента. Доступно только с системой Bose.</td><td class="desc en">Bose Centerpoint® — virtual surround from stereo content. Available only with Bose system.</td></tr>
+  <tr><td class="ev">audioAudioPilot</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Bose AudioPilot® — автоматическая компенсация дорожного шума (поднимает громкость при шуме дороги). Доступно только с системой Bose.</td><td class="desc en">Bose AudioPilot® — automatic road noise compensation (raises volume with road noise). Available only with Bose system.</td></tr>
+</table>
+
+<h3>Beep / Alerts — <span class="ru">сигналы кнопок</span><span class="en">Button Beeps</span></h3>
+<table>
+  <tr><th>eventName (appData)</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">enableBeepOnOff</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Звуковое подтверждение нажатия кнопок на панели и мультиконтроллере (щелчок при выборе).</td><td class="desc en">Button press confirmation beep on panel and multicontroller (click on selection).</td></tr>
+  <tr><td class="ev">SetCDCSetting</td><td class="par"><code>{ payload: { … } }</code></td><td class="desc ru">Настройки аудиовыхода CD-чейнджера (CDC) — коррекция уровней сигнала.</td><td class="desc en">CD changer (CDC) audio output settings — signal level correction.</td></tr>
+</table>
+
+<pre><span class="c ru">// Примеры (equalizer items используют appData как eventName):</span>
+<span class="c en">// Examples (equalizer items use appData as the eventName):</span>
+framework.sendEventToMmui(<span class="s">"audiosettings"</span>, <span class="s">"audioBass"</span>,        { <span class="p">payload</span>: { <span class="p">value</span>: 3 } });
+framework.sendEventToMmui(<span class="s">"audiosettings"</span>, <span class="s">"audioTreble"</span>,      { <span class="p">payload</span>: { <span class="p">value</span>: -2 } });
+framework.sendEventToMmui(<span class="s">"audiosettings"</span>, <span class="s">"audioFader"</span>,        { <span class="p">payload</span>: { <span class="p">value</span>: 0 } });
+framework.sendEventToMmui(<span class="s">"audiosettings"</span>, <span class="s">"audioBalance"</span>,      { <span class="p">payload</span>: { <span class="p">value</span>: 0 } });
+framework.sendEventToMmui(<span class="s">"audiosettings"</span>, <span class="s">"audioAutoVolume"</span>,   { <span class="p">payload</span>: { <span class="p">level</span>: 2 } });
+framework.sendEventToMmui(<span class="s">"audiosettings"</span>, <span class="s">"audioCenterpoint"</span>, { <span class="p">payload</span>: { <span class="p">enabled</span>: <span class="k">true</span> } });
+framework.sendEventToMmui(<span class="s">"audiosettings"</span>, <span class="s">"audioAudioPilot"</span>,  { <span class="p">payload</span>: { <span class="p">enabled</span>: <span class="k">true</span> } });
+framework.sendEventToMmui(<span class="s">"audiosettings"</span>, <span class="s">"enableBeepOnOff"</span>,  { <span class="p">payload</span>: { <span class="p">enabled</span>: <span class="k">false</span> } });
+framework.sendEventToMmui(<span class="s">"audiosettings"</span>, <span class="s">"SetCallVolume"</span>,    { <span class="p">payload</span>: { <span class="p">volume</span>: 20 } });</pre>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="vehsettings">component: <code>"vehsettings"</code></h2>
+<p class="ru">Настройки автомобиля — замки, освещение, HUD, ADAS, камеры, скорость. Все <code>Set*</code> принимают <code>{ payload: { evData: "…" } }</code> или специфичный payload.</p>
+<p class="en">Vehicle settings — door locks, lighting, HUD, ADAS, cameras, speed. All <code>Set*</code> accept <code>{ payload: { evData: "…" } }</code> or a specific payload.</p>
+
+<h3>HUD — <span class="ru">проекционный дисплей</span><span class="en">Head-Up Display</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetHudBrightness</td><td class="par"><code>{ payload: { value: 0–100 } }</code></td><td class="desc ru">Яркость HUD. Применяется сразу.</td><td class="desc en">HUD brightness level. Applied immediately.</td></tr>
+  <tr><td class="ev">SetHudBrightnessControl</td><td class="par"><code>{ payload: { mode: "auto"|"manual" } }</code></td><td class="desc ru">Режим управления яркостью HUD: автоматически по освещённости или вручную.</td><td class="desc en">HUD brightness control mode: auto (by ambient light) or manual.</td></tr>
+  <tr><td class="ev">SetHudHeight</td><td class="par"><code>{ payload: { value: … } }</code></td><td class="desc ru">Вертикальное положение изображения HUD (подстройка под рост водителя).</td><td class="desc en">HUD image vertical position (adjust for driver height).</td></tr>
+  <tr><td class="ev">SetHUDRotation</td><td class="par"><code>{ payload: { value: … } }</code></td><td class="desc ru">Угол наклона изображения HUD.</td><td class="desc en">HUD image rotation angle.</td></tr>
+  <tr><td class="ev">SetHudCalibration</td><td class="par"><code>{ payload: { … } }</code></td><td class="desc ru">Калибровка HUD — заводская процедура точной настройки позиции изображения.</td><td class="desc en">HUD calibration — factory procedure for precise image position alignment.</td></tr>
+  <tr><td class="ev">SetHudNavigation</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Показывать навигационные стрелки и расстояние до поворота на HUD.</td><td class="desc en">Show navigation turn arrows and distance on HUD.</td></tr>
+  <tr><td class="ev">SetHUDStreet</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Показывать название текущей улицы на HUD.</td><td class="desc en">Show current street name on HUD.</td></tr>
+  <tr><td class="ev">SetHudOpenClose</td><td class="par"><code>{ payload: { open: true|false } }</code></td><td class="desc ru">Выдвинуть или убрать панель HUD механически.</td><td class="desc en">Physically extend or retract the HUD panel.</td></tr>
+  <tr><td class="ev">SelectHUDNavigation</td><td class="par">—</td><td class="desc ru">Открыть экран настроек навигации на HUD.</td><td class="desc en">Open HUD navigation settings screen.</td></tr>
+  <tr><td class="ev">SelectHUDNavigationScreen</td><td class="par">—</td><td class="desc ru">Переключить экран выбора контента HUD.</td><td class="desc en">Switch HUD content selection screen.</td></tr>
+  <tr><td class="ev">SelectDisplayInformation</td><td class="par">—</td><td class="desc ru">Экран информации о дисплее HUD (диагностические параметры).</td><td class="desc en">HUD display information screen (diagnostic parameters).</td></tr>
+  <tr><td class="ev">SelectDisplayInformationJ36</td><td class="par">—</td><td class="desc ru">Версия экрана информации для платформы J36 (Mazda CX-5/Mazda 6).</td><td class="desc en">Display information screen variant for J36 platform (Mazda CX-5/Mazda 6).</td></tr>
+  <tr><td class="ev">GoHUDReset</td><td class="par">—</td><td class="desc ru">Сбросить все настройки HUD к заводским значениям.</td><td class="desc en">Reset all HUD settings to factory defaults.</td></tr>
+</table>
+
+<h3>ADAS / Safety — <span class="ru">активная безопасность</span><span class="en">Active Safety</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetSBS</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Smart Brake Support (SBS) — автоторможение при риске столкновения на скоростях &gt;15 км/ч.</td><td class="desc en">Smart Brake Support (SBS) — auto-braking when collision risk detected above 15 km/h.</td></tr>
+  <tr><td class="ev">SetSBSDistance</td><td class="par"><code>{ payload: { distance: … } }</code></td><td class="desc ru">Дистанция срабатывания SBS.</td><td class="desc en">SBS trigger distance threshold.</td></tr>
+  <tr><td class="ev">SetSBSBuzzerVolume</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Громкость звукового предупреждения SBS.</td><td class="desc en">SBS warning buzzer volume.</td></tr>
+  <tr><td class="ev">GoSBS / GoSBS_SCBS / GoSBS_SCBS_J36IPM</td><td class="par">—</td><td class="desc ru">Открыть экран настроек SBS / SBS+SCBS / для J36 IPM.</td><td class="desc en">Open SBS / SBS+SCBS / J36 IPM settings screen.</td></tr>
+  <tr><td class="ev">GoSBSReset / GoSBS_SCBSReset / GoSBS_SCBS_J36IPMReset</td><td class="par">—</td><td class="desc ru">Сбросить настройки SBS / SBS+SCBS / J36 к заводским.</td><td class="desc en">Reset SBS / SBS+SCBS / J36 settings to factory defaults.</td></tr>
+  <tr><td class="ev">SetSCBS</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Smart City Brake Support (SCBS) — экстренное торможение на малых скоростях &lt;30 км/ч.</td><td class="desc en">Smart City Brake Support (SCBS) — emergency braking at city speeds &lt;30 km/h.</td></tr>
+  <tr><td class="ev">SetSCBSDistance_J36IPM</td><td class="par"><code>{ payload: { distance: … } }</code></td><td class="desc ru">Дистанция срабатывания SCBS (платформа J36 IPM).</td><td class="desc en">SCBS trigger distance for J36 IPM platform.</td></tr>
+  <tr><td class="ev">SetSCBSMode_J36IPM</td><td class="par"><code>{ payload: { mode: … } }</code></td><td class="desc ru">Режим работы SCBS для J36 IPM.</td><td class="desc en">SCBS operating mode for J36 IPM.</td></tr>
+  <tr><td class="ev">SetFOW</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Front Obstruction Warning (FOW) — предупреждение о препятствии впереди при движении задним ходом.</td><td class="desc en">Front Obstruction Warning (FOW) — warns of obstacles ahead when reversing.</td></tr>
+  <tr><td class="ev">SetFOWDistance</td><td class="par"><code>{ payload: { distance: … } }</code></td><td class="desc ru">Порог дистанции для срабатывания FOW.</td><td class="desc en">FOW trigger distance threshold.</td></tr>
+  <tr><td class="ev">SetFOWBuzzerVolume</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Громкость сигнала предупреждения FOW.</td><td class="desc en">FOW warning buzzer volume.</td></tr>
+  <tr><td class="ev">GoFOW / ResetFOWSettings</td><td class="par">—</td><td class="desc ru">Открыть экран FOW / сбросить настройки FOW.</td><td class="desc en">Open FOW settings screen / reset FOW settings.</td></tr>
+  <tr><td class="ev">SetDRSS</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Driver Risk Support System (DRSS) — мониторинг стиля вождения, реагирует на резкие манёвры.</td><td class="desc en">Driver Risk Support System (DRSS) — monitors driving style, responds to harsh manoeuvres.</td></tr>
+  <tr><td class="ev">SetDRSSDistance</td><td class="par"><code>{ payload: { distance: … } }</code></td><td class="desc ru">Дистанция слежения DRSS.</td><td class="desc en">DRSS monitoring distance.</td></tr>
+  <tr><td class="ev">GoDRSSReset</td><td class="par">—</td><td class="desc ru">Сбросить настройки DRSS.</td><td class="desc en">Reset DRSS settings.</td></tr>
+</table>
+
+<h3>LAS / LDW — <span class="ru">контроль полосы</span><span class="en">Lane Assist / Lane Departure</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetLASAlert</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Lane-keep Assist System (LAS) — предупреждение при выходе из полосы.</td><td class="desc en">Lane-keep Assist System (LAS) — alert when departing lane.</td></tr>
+  <tr><td class="ev">SetLASIntervention</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">LAS активное вмешательство — лёгкое подруливание для удержания в полосе.</td><td class="desc en">LAS active intervention — gentle steering input to keep in lane.</td></tr>
+  <tr><td class="ev">SetLASSound</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Звуковое предупреждение LAS.</td><td class="desc en">LAS audio warning toggle.</td></tr>
+  <tr><td class="ev">SetLASSoundVol</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Громкость звукового предупреждения LAS.</td><td class="desc en">LAS warning sound volume.</td></tr>
+  <tr><td class="ev">GoLAS / GoLASSound / GoLASReset</td><td class="par">—</td><td class="desc ru">Открыть экран LAS / настройки звука LAS / сбросить LAS.</td><td class="desc en">Open LAS screen / LAS sound settings / reset LAS.</td></tr>
+  <tr><td class="ev">SetLDWSWarning</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Lane Departure Warning System (LDWS) — звуковое предупреждение при пересечении разметки без поворотника.</td><td class="desc en">LDWS — audio warning when crossing lane marking without turn signal.</td></tr>
+  <tr><td class="ev">SetLDWSTiming</td><td class="par"><code>{ payload: { timing: … } }</code></td><td class="desc ru">Момент срабатывания предупреждения LDWS (раньше/позже пересечения разметки).</td><td class="desc en">LDWS warning trigger timing (early/late relative to line crossing).</td></tr>
+  <tr><td class="ev">SetLDWSBuzzerVolume</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Громкость звукового сигнала LDWS.</td><td class="desc en">LDWS buzzer volume.</td></tr>
+  <tr><td class="ev">SetLDWSRumbleVolume</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Интенсивность вибрационного предупреждения LDWS (вибрация руля).</td><td class="desc en">LDWS rumble strip warning intensity (steering wheel vibration).</td></tr>
+  <tr><td class="ev">GoLDWSReset / GoLDWSTiming</td><td class="par">—</td><td class="desc ru">Сбросить LDWS / открыть настройку тайминга LDWS.</td><td class="desc en">Reset LDWS / open LDWS timing settings.</td></tr>
+  <tr><td class="ev">SelectLaneDepartureWarning</td><td class="par">—</td><td class="desc ru">Открыть экран выбора настроек LDWS.</td><td class="desc en">Open LDWS settings selection screen.</td></tr>
+</table>
+
+<h3>BSM — <span class="ru">контроль слепых зон</span><span class="en">Blind Spot Monitoring</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetBSMSystem</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Включить/выключить Blind Spot Monitoring (BSM) — световой индикатор в боковом зеркале при наличии машины в слепой зоне.</td><td class="desc en">Enable/disable BSM — mirror LED warns of vehicles in blind spots.</td></tr>
+  <tr><td class="ev">SetBSMBuzzerVolume</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Громкость звукового сигнала BSM при перестроении с машиной в слепой зоне.</td><td class="desc en">BSM buzzer volume when lane-changing with a vehicle in the blind spot.</td></tr>
+  <tr><td class="ev">SetBSMVolume</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Общая громкость уведомлений BSM.</td><td class="desc en">Overall BSM notification volume.</td></tr>
+  <tr><td class="ev">SetRVMBuzzerVolume</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Rear Vehicle Monitoring (RVM) — громкость сигнала при приближении авто сзади при открытии двери.</td><td class="desc en">RVM buzzer volume — warns when vehicle approaches from behind while opening door.</td></tr>
+  <tr><td class="ev">SelectBSMSystem / SelectBSMBuzzerVolume / SelectRVMBuzzerVolume</td><td class="par">—</td><td class="desc ru">Открыть экраны выбора настроек BSM / громкости BSM / громкости RVM.</td><td class="desc en">Open BSM system / BSM volume / RVM volume selection screens.</td></tr>
+</table>
+
+<h3>Camera / 360° — <span class="ru">камеры обзора</span><span class="en">Camera / Surround View</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">GoCamera360View</td><td class="par"><code>{ payload: { evData: "GoCamera360View" } }</code></td><td class="desc ru">Открыть режим кругового обзора 360° (требует камеры TVM/SVS).</td><td class="desc en">Open 360° surround-view mode (requires TVM/SVS camera system).</td></tr>
+  <tr><td class="ev">SetTVMAutoViewStart</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автоматически показывать камеру при включении задней передачи.</td><td class="desc en">Auto-display TVM camera when reverse gear is engaged.</td></tr>
+  <tr><td class="ev">SetTVMVehiclePathLine</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Показывать/скрывать линии траектории движения на экране камеры.</td><td class="desc en">Show/hide predicted vehicle path lines on camera display.</td></tr>
+  <tr><td class="ev">SetTVMFrontViewDisplay</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Показывать вид спереди при движении на малой скорости вперёд.</td><td class="desc en">Display front view when moving forward at low speed.</td></tr>
+</table>
+
+<h3>Door / Lock — <span class="ru">замки и доступ</span><span class="en">Door Locks &amp; Access</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetAutoDoorLockAT</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автоблокировка при наборе скорости — AT (автоматическая КП).</td><td class="desc en">Auto-lock when vehicle accelerates — AT (automatic transmission).</td></tr>
+  <tr><td class="ev">SetAutoDoorLockAT6</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автоблокировка — AT6 (6-ступенчатый автомат, альтернативная логика).</td><td class="desc en">Auto-lock — AT6 (6-speed automatic, alternative logic).</td></tr>
+  <tr><td class="ev">SetAutoDoorLockMT</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автоблокировка при наборе скорости — MT (механическая КП).</td><td class="desc en">Auto-lock when vehicle accelerates — MT (manual transmission).</td></tr>
+  <tr><td class="ev">SetUnlockMode</td><td class="par"><code>{ payload: { mode: "all"|"driver" } }</code></td><td class="desc ru">Режим разблокировки: все двери сразу или только дверь водителя.</td><td class="desc en">Unlock all doors at once or driver door only.</td></tr>
+  <tr><td class="ev">SetAutoRelockTimer</td><td class="par"><code>{ payload: { seconds: … } }</code></td><td class="desc ru">Время ожидания перед повторной автоблокировкой, если дверь не была открыта.</td><td class="desc en">Wait time before auto re-lock if door was not opened after unlock.</td></tr>
+  <tr><td class="ev">SetWalkAwayLock</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Блокировка при удалении от авто с ключом-картой (Keyless).</td><td class="desc en">Lock when walking away with keycard (Keyless entry).</td></tr>
+  <tr><td class="ev">SetHandsFreeLiftgate</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Открытие багажника движением ноги под задним бампером.</td><td class="desc en">Open trunk by foot gesture under rear bumper.</td></tr>
+  <tr><td class="ev">SetKeylessLockBeepVol</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Громкость подтверждающего сигнала при keyless-блокировке.</td><td class="desc en">Keyless lock confirmation beep volume.</td></tr>
+  <tr><td class="ev">GoDoorLock</td><td class="par">—</td><td class="desc ru">Открыть экран настроек замков.</td><td class="desc en">Open door lock settings screen.</td></tr>
+  <tr><td class="ev">GoDoorLockMode</td><td class="par">—</td><td class="desc ru">Подменю режима блокировки (выбор момента блокировки).</td><td class="desc en">Door lock mode submenu (when to lock).</td></tr>
+  <tr><td class="ev">GoDoorRelockTime</td><td class="par">—</td><td class="desc ru">Подменю задержки повторной блокировки.</td><td class="desc en">Auto re-lock delay submenu.</td></tr>
+  <tr><td class="ev">GoUnlockMode</td><td class="par">—</td><td class="desc ru">Подменю режима разблокировки (все/водитель).</td><td class="desc en">Unlock mode submenu (all/driver).</td></tr>
+  <tr><td class="ev">GoDoorLockReset</td><td class="par">—</td><td class="desc ru">Сбросить настройки замков к заводским.</td><td class="desc en">Reset door lock settings to factory defaults.</td></tr>
+  <tr><td class="ev">GoKeylessLockBeepVol</td><td class="par">—</td><td class="desc ru">Открыть экран настройки громкости сигнала keyless.</td><td class="desc en">Open keyless beep volume settings screen.</td></tr>
+</table>
+
+<h3>Lighting — <span class="ru">освещение</span><span class="en">Lighting</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetDaytimeRunningLights</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Дневные ходовые огни (DRL) — включить/выключить.</td><td class="desc en">Daytime Running Lights (DRL) — enable/disable.</td></tr>
+  <tr><td class="ev">SetAutoHeadlightSensitivity</td><td class="par"><code>{ payload: { level: 1–5 } }</code></td><td class="desc ru">Чувствительность датчика для авто-включения фар (1=самая высокая, 5=самая низкая).</td><td class="desc en">Auto headlight sensor sensitivity (1=highest, 5=lowest).</td></tr>
+  <tr><td class="ev">SetHeadlightOnWarning</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Предупреждение «фары включены» при выходе из автомобиля.</td><td class="desc en">Warn driver that headlights are on when exiting the vehicle.</td></tr>
+  <tr><td class="ev">SetHeadlightOffTimer</td><td class="par"><code>{ payload: { seconds: … } }</code></td><td class="desc ru">Время работы фар «проводи домой» после выключения двигателя (0 = выкл).</td><td class="desc en">Follow-me-home headlight duration after engine off (0 = disabled).</td></tr>
+  <tr><td class="ev">SetHBC</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">High Beam Control (HBC) — автоматическое переключение дальнего/ближнего света.</td><td class="desc en">High Beam Control (HBC) — auto high/low beam switching.</td></tr>
+  <tr><td class="ev">SetAFS</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Adaptive Front-lighting System (AFS) — поворот фар в направлении руления.</td><td class="desc en">Adaptive Front-lighting System (AFS) — headlights turn with steering direction.</td></tr>
+  <tr><td class="ev">SetCHLT</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Corner-lighting (CHLT) — дополнительная подсветка угла при повороте.</td><td class="desc en">Corner High-beam Light Turn (CHLT) — additional illumination when cornering.</td></tr>
+  <tr><td class="ev">SetLHL</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Levelling Headlamp (LHL) — автоматическая корректировка наклона фар по загрузке.</td><td class="desc en">Levelling Headlamp (LHL) — auto headlight levelling by vehicle load.</td></tr>
+  <tr><td class="ev">SetILB</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Interior Lighting Brightness (ILB) — яркость подсветки салона.</td><td class="desc en">Interior Lighting Brightness (ILB) — cabin light brightness.</td></tr>
+  <tr><td class="ev">GoLighting / GoAutoHeadlightOn / GoLightingReset / GoCHLT</td><td class="par">—</td><td class="desc ru">Открыть раздел освещения / автофары / сброс / CHLT.</td><td class="desc en">Open lighting / auto headlight / reset / CHLT settings.</td></tr>
+  <tr><td class="ev">SelectHeadlightOffTimer / SelectILB</td><td class="par">—</td><td class="desc ru">Открыть экран выбора таймера фар / яркости салона.</td><td class="desc en">Open headlight timer / interior brightness selection screen.</td></tr>
+  <tr><td class="ev">SetInteriorLightTimeoutDoorOpen</td><td class="par"><code>{ payload: { seconds: … } }</code></td><td class="desc ru">Время выключения салонного света при открытой двери (0 = никогда).</td><td class="desc en">Interior light auto-off when door is open (0 = never).</td></tr>
+  <tr><td class="ev">SetInteriorLightTimeoutDoorClosed</td><td class="par"><code>{ payload: { seconds: … } }</code></td><td class="desc ru">Время выключения салонного света после закрытия двери.</td><td class="desc en">Interior light auto-off delay after door close.</td></tr>
+  <tr><td class="ev">SelectInteriorLightTimeoutDoorOpen / DoorClosed</td><td class="par">—</td><td class="desc ru">Открыть экран выбора таймера салонного освещения.</td><td class="desc en">Open interior light timer selection screen.</td></tr>
+</table>
+
+<h3>Turn Signal / Wiper — <span class="ru">поворотники и дворники</span><span class="en">Turn Signal &amp; Wiper</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">Set3FlashTurnSignal</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Режим «3 вспышки»: короткое нажатие рычага поворотника = 3 мигания (удобно при смене полосы).</td><td class="desc en">3-flash mode: short stalk press = 3 blinks (lane-change convenience).</td></tr>
+  <tr><td class="ev">SetTurnSignalIndicatorVolume</td><td class="par"><code>{ payload: { volume: … } }</code></td><td class="desc ru">Громкость щелчка поворотника в салоне.</td><td class="desc en">Interior turn signal click volume.</td></tr>
+  <tr><td class="ev">SetRainSensingWiper</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Дождевой датчик — автоматическое включение дворников при дожде.</td><td class="desc en">Rain-sensing wiper — auto wipers when rain detected.</td></tr>
+  <tr><td class="ev">GoTurnSettings / GoTurnReset</td><td class="par">—</td><td class="desc ru">Открыть настройки поворотника / сбросить к заводским.</td><td class="desc en">Open turn signal settings / reset to factory defaults.</td></tr>
+</table>
+
+<h3>Speed Limit / Alert — <span class="ru">ограничение скорости</span><span class="en">Speed Limit &amp; Alert</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetSpeedAlarm</td><td class="par"><code>{ payload: { speed: … } }</code></td><td class="desc ru">Установить порог скорости для звукового оповещения.</td><td class="desc en">Set speed threshold for audio alert.</td></tr>
+  <tr><td class="ev">SetSpeedAlarmOnOff</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Включить/выключить оповещение о превышении скорости.</td><td class="desc en">Enable/disable speed alarm.</td></tr>
+  <tr><td class="ev">SelectSpeedAlarm / SelectSPIReset</td><td class="par">—</td><td class="desc ru">Открыть экран настройки скоростного сигнала / сбросить SPI.</td><td class="desc en">Open speed alarm settings / reset SPI (Speed Pulse Input).</td></tr>
+  <tr><td class="ev">SetSLC</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Speed Limit Caution (SLC) — предупреждение при превышении лимита из базы карт.</td><td class="desc en">Speed Limit Caution (SLC) — warn when exceeding map speed limit.</td></tr>
+  <tr><td class="ev">SetCautionSpeed</td><td class="par"><code>{ payload: { speed: … } }</code></td><td class="desc ru">Порог скорости для предупреждения Caution (например, в школьных зонах).</td><td class="desc en">Caution speed threshold (e.g. for school zones).</td></tr>
+  <tr><td class="ev">SetSLS_HUD</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Показывать знак ограничения скорости на HUD.</td><td class="desc en">Display speed limit sign on HUD.</td></tr>
+  <tr><td class="ev">SetSLS_Center</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Показывать знак ограничения скорости на центральном дисплее (MID).</td><td class="desc en">Display speed limit sign on central display (MID).</td></tr>
+  <tr><td class="ev">SetSLS_WHUD</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Показывать знак ограничения скорости на широком HUD (Wide HUD).</td><td class="desc en">Display speed limit sign on Wide HUD.</td></tr>
+  <tr><td class="ev">SelectSpeedLimitInfo / SelectSLSign / SelectSLCaution / SelectCautionSpeed</td><td class="par">—</td><td class="desc ru">Открыть экраны: информация о SL / знак SL / предупреждение SL / порог Caution.</td><td class="desc en">Open: SL info / SL sign / SL caution / caution speed screens.</td></tr>
+</table>
+
+<h3><span class="ru">Прочее</span><span class="en">Misc</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetParkingSensor</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Парковочные датчики PDC — включить/выключить.</td><td class="desc en">Parking Distance Control (PDC) sensors — enable/disable.</td></tr>
+  <tr><td class="ev">SetMeterAmbientDisplayOnOff</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Амбиентная подсветка приборной панели.</td><td class="desc en">Instrument cluster ambient display mode.</td></tr>
+  <tr><td class="ev">SetSyncOnOff</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Синхронизация климата/сидений между водителем и пассажиром.</td><td class="desc en">Sync climate/seat settings between driver and passenger.</td></tr>
+  <tr><td class="ev">SetEndingScreenOnOff</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Анимация «до свидания» при выключении системы.</td><td class="desc en">Goodbye animation when system shuts down.</td></tr>
+  <tr><td class="ev">SetDA</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Driver Attention (DA) — система контроля внимания водителя.</td><td class="desc en">Driver Attention (DA) monitoring system.</td></tr>
+  <tr><td class="ev">SelectDisplayReset</td><td class="par">—</td><td class="desc ru">Сбросить настройки дисплея vehsettings к заводским.</td><td class="desc en">Reset vehsettings display parameters to factory defaults.</td></tr>
+  <tr><td class="ev">HUDDisplayInfoResetMessage</td><td class="par">—</td><td class="desc ru">Уведомить MMUI о сбросе информационного сообщения HUD.</td><td class="desc en">Notify MMUI that the HUD info message was reset.</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="schedmaint">component: <code>"schedmaint"</code></h2>
+<p class="ru">Напоминания о техническом обслуживании — пробег и время до следующего ТО.</p>
+<p class="en">Scheduled Maintenance reminders — mileage and time until next service.</p>
+
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetDistanceValue</td><td class="par"><code>{ payload: { distance: &lt;км/миль&gt; } }</code></td><td class="desc ru">Установить интервал пробега до следующего ТО. Влияет на счётчик в панели приборов.</td><td class="desc en">Set mileage interval for next service. Affects the instrument cluster service counter.</td></tr>
+  <tr><td class="ev">SetTimeValue</td><td class="par"><code>{ payload: { months: &lt;n&gt; } }</code></td><td class="desc ru">Установить интервал времени (в месяцах) до следующего ТО.</td><td class="desc en">Set time interval (months) for next service.</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="phone">component: <code>"phone"</code> / <code>"contacts"</code> / <code>"sms"</code> / <code>"email"</code> / <code>"btpairing"</code></h2>
+<p class="ru">Телефония — звонки, DTMF, контакты, SMS, email, Bluetooth-сопряжение.</p>
+<p class="en">Telephony — calls, DTMF, contacts, SMS, email, Bluetooth pairing.</p>
+
+<h3>Calls — <span class="ru">звонки</span><span class="en">Calls</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SelectCall</td><td class="par">—</td><td class="desc ru">Инициировать звонок выбранному контакту.</td><td class="desc en">Initiate call to the selected contact.</td></tr>
+  <tr><td class="ev">CallRecentByLine</td><td class="par"><code>{ payload: { phoneNumber: "…" } }</code></td><td class="desc ru">Позвонить номеру из списка последних звонков.</td><td class="desc en">Call a number from the recent calls list.</td></tr>
+  <tr><td class="ev">CallDialpadNumber</td><td class="par">—</td><td class="desc ru">Позвонить номеру, набранному на клавиатуре.</td><td class="desc en">Call the number entered on the dialpad.</td></tr>
+  <tr><td class="ev">SystemRedial</td><td class="par">—</td><td class="desc ru">Перезвонить на последний набранный номер.</td><td class="desc en">Redial the last dialled number.</td></tr>
+  <tr><td class="ev">HangUp</td><td class="par">—</td><td class="desc ru">Завершить активный звонок.</td><td class="desc en">End the active call.</td></tr>
+  <tr><td class="ev">BargeIntoCall</td><td class="par">—</td><td class="desc ru">Подключиться к ожидающему звонку (конференц-режим).</td><td class="desc en">Join the waiting call (conference mode).</td></tr>
+  <tr><td class="ev">TransferToHandset</td><td class="par">—</td><td class="desc ru">Перевести звук звонка в трубку телефона из громкой связи.</td><td class="desc en">Transfer call audio from hands-free to phone handset.</td></tr>
+  <tr><td class="ev">TransferFromHandset</td><td class="par">—</td><td class="desc ru">Вернуть звук звонка из трубки в автомобиль.</td><td class="desc en">Transfer call audio back from handset to car.</td></tr>
+  <tr><td class="ev">SelectRecentCallsToggle</td><td class="par">—</td><td class="desc ru">Переключить фильтр списка звонков: Все / Пропущенные / Исходящие.</td><td class="desc en">Toggle recent calls filter: All / Missed / Dialled.</td></tr>
+</table>
+
+<h3>Dialpad / DTMF — <span class="ru">набор и тональные сигналы</span><span class="en">Dialpad &amp; DTMF</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">EnterDigit</td><td class="par"><code>{ payload: { digit: "0"–"9"|"*"|"#" } }</code></td><td class="desc ru">DTMF-тон во время звонка (для IVR-меню и автодозвона). Отправляет тон в активный разговор.</td><td class="desc en">DTMF tone during a call (for IVR menus and auto-dial). Sends tone into the active call.</td></tr>
+  <tr><td class="ev">DeleteDigit</td><td class="par">—</td><td class="desc ru">Удалить последний введённый символ на клавиатуре набора номера.</td><td class="desc en">Delete the last digit entered on the dialpad.</td></tr>
+  <tr><td class="ev">SelectKeypadDigit</td><td class="par"><code>{ payload: { digit: "…" } }</code></td><td class="desc ru">Нажать конкретную кнопку клавиатуры — добавляет символ в поле набора.</td><td class="desc en">Press a specific dialpad key — appends character to the dialling field.</td></tr>
+  <tr><td class="ev">DialpadUpdateNumericField</td><td class="par"><code>{ payload: { phoneNumber: "…" } }</code></td><td class="desc ru">Программно обновить поле ввода номера (вставка из буфера).</td><td class="desc en">Programmatically update the dialpad number field (paste from clipboard).</td></tr>
+  <tr><td class="ev">SelectDtmfHide</td><td class="par">—</td><td class="desc ru">Скрыть DTMF-клавиатуру во время звонка (вернуться к экрану вызова).</td><td class="desc en">Hide the DTMF dialpad during call (return to call screen).</td></tr>
+</table>
+
+<h3>Contacts — <span class="ru">контакты</span><span class="en">Contacts</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SelectContactList</td><td class="par">—</td><td class="desc ru">Открыть список контактов (алфавитный).</td><td class="desc en">Open contacts list (alphabetical).</td></tr>
+  <tr><td class="ev">SelectContactName</td><td class="par"><code>{ payload: { contactId: …, name: "…" } }</code></td><td class="desc ru">Выбрать контакт для просмотра деталей или звонка.</td><td class="desc en">Select a contact to view details or call.</td></tr>
+  <tr><td class="ev">SelectFavoritesContact</td><td class="par"><code>{ payload: { contactId: … } }</code></td><td class="desc ru">Выбрать контакт из списка «Избранные контакты».</td><td class="desc en">Select a contact from the Favourite Contacts list.</td></tr>
+  <tr><td class="ev">SelectFavoritesNumber</td><td class="par"><code>{ payload: { phoneNumber: "…" } }</code></td><td class="desc ru">Выбрать номер из «Избранных номеров» для быстрого набора.</td><td class="desc en">Select a number from Favourite Numbers for speed dial.</td></tr>
+  <tr><td class="ev">SetAutoDownloadContacts</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Автосинхронизация контактов с телефоном по Bluetooth при подключении.</td><td class="desc en">Auto-sync contacts from phone via Bluetooth on connection.</td></tr>
+  <tr><td class="ev">SetContactsSortOrder</td><td class="par"><code>{ payload: { order: "first"|"last" } }</code></td><td class="desc ru">Сортировка контактов по имени (first) или фамилии (last).</td><td class="desc en">Sort contacts by first name or last name.</td></tr>
+  <tr><td class="ev">ImportFailure</td><td class="par">—</td><td class="desc ru">GUI уведомляет MMUI об ошибке импорта контактов с телефона.</td><td class="desc en">GUI notifies MMUI that contact import from phone failed.</td></tr>
+  <tr><td class="ev">DataLoaded</td><td class="par">—</td><td class="desc ru">GUI уведомляет MMUI, что список контактов загружен и готов к отображению.</td><td class="desc en">GUI notifies MMUI that the contacts list has loaded and is ready to display.</td></tr>
+</table>
+
+<h3>SMS — <span class="ru">сообщения</span><span class="en">SMS Messages</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">EditMessage</td><td class="par">—</td><td class="desc ru">Открыть редактор черновика SMS (экранная клавиатура).</td><td class="desc en">Open SMS draft editor (on-screen keyboard).</td></tr>
+  <tr><td class="ev">SaveMessage</td><td class="par">—</td><td class="desc ru">Сохранить черновик SMS.</td><td class="desc en">Save the SMS draft.</td></tr>
+  <tr><td class="ev">SelectSend</td><td class="par">—</td><td class="desc ru">Отправить подготовленное SMS-сообщение.</td><td class="desc en">Send the prepared SMS message.</td></tr>
+  <tr><td class="ev">ImportMessages</td><td class="par">—</td><td class="desc ru">Импортировать SMS из телефона по Bluetooth (MAP-профиль).</td><td class="desc en">Import SMS messages from phone via Bluetooth (MAP profile).</td></tr>
+  <tr><td class="ev">SetSMSNotify</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Включить/выключить всплывающее уведомление о входящем SMS на экране CMU.</td><td class="desc en">Enable/disable incoming SMS pop-up notification on CMU screen.</td></tr>
+  <tr><td class="ev">SystemErrorCondition</td><td class="par">—</td><td class="desc ru">GUI уведомляет MMUI о системной ошибке (потеря BT-соединения, ошибка MAP).</td><td class="desc en">GUI notifies MMUI of a system error (BT connection loss, MAP error).</td></tr>
+  <tr><td class="ev">SystemErrorConditionRetry</td><td class="par">—</td><td class="desc ru">Повторить попытку после системной ошибки SMS.</td><td class="desc en">Retry after SMS system error.</td></tr>
+</table>
+
+<h3>Email — <span class="ru">электронная почта</span><span class="en">Email</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SetEmailNotify</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Включить/выключить уведомления о входящем email на экране CMU.</td><td class="desc en">Enable/disable incoming email notification on CMU screen.</td></tr>
+  <tr><td class="ev">SelectAccountName</td><td class="par"><code>{ payload: { account: "…" } }</code></td><td class="desc ru">Выбрать email-аккаунт (если к CMU подключено несколько телефонов с разными учётными записями).</td><td class="desc en">Select email account (when multiple phones with different accounts are connected).</td></tr>
+  <tr><td class="ev">SelectAllAccounts</td><td class="par">—</td><td class="desc ru">Показать email из всех подключённых аккаунтов.</td><td class="desc en">Show email from all connected accounts.</td></tr>
+  <tr><td class="ev">SelectImportEmail</td><td class="par">—</td><td class="desc ru">Запустить импорт email с телефона.</td><td class="desc en">Trigger email import from phone.</td></tr>
+  <tr><td class="ev">TimeOut</td><td class="par">—</td><td class="desc ru">Тайм-аут ожидания ответа при загрузке email — GUI уведомляет MMUI.</td><td class="desc en">Email load timeout — GUI notifies MMUI that waiting for response timed out.</td></tr>
+</table>
+
+<h3>Bluetooth Pairing — <span class="ru">сопряжение устройств</span><span class="en">Bluetooth Pairing</span></h3>
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">ToggleBluetoothOn</td><td class="par">—</td><td class="desc ru">Включить Bluetooth-радио.</td><td class="desc en">Enable the Bluetooth radio.</td></tr>
+  <tr><td class="ev">ToggleBluetoothOff</td><td class="par">—</td><td class="desc ru">Выключить Bluetooth-радио. Отключает все подключённые устройства.</td><td class="desc en">Disable the Bluetooth radio. Disconnects all paired devices.</td></tr>
+  <tr><td class="ev">SelectConnect</td><td class="par">—</td><td class="desc ru">Подключить выбранное Bluetooth-устройство из списка сопряжённых.</td><td class="desc en">Connect the selected Bluetooth device from the paired list.</td></tr>
+  <tr><td class="ev">SelectDisconnect</td><td class="par">—</td><td class="desc ru">Отключить выбранное Bluetooth-устройство.</td><td class="desc en">Disconnect the selected Bluetooth device.</td></tr>
+  <tr><td class="ev">ChangePairCodeYes</td><td class="par"><code>{ payload: { input: "…" } }</code></td><td class="desc ru">Подтвердить PIN-код при сопряжении Bluetooth-устройства.</td><td class="desc en">Confirm PIN code during Bluetooth device pairing.</td></tr>
+  <tr><td class="ev">SetIncomingCallNotify</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Включить/выключить всплывающее уведомление о входящем вызове на экране CMU.</td><td class="desc en">Enable/disable incoming call pop-up notification on CMU screen.</td></tr>
+  <tr><td class="ev">SelectFavoritesAddress</td><td class="par"><code>{ payload: { … } }</code></td><td class="desc ru">Выбрать адрес из избранного (общее для btpairing и contacts).</td><td class="desc en">Select a favourite address (shared between btpairing and contacts).</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="media">component: <code>"usbaudio"</code> / <code>"btaudio"</code> / <code>"cd"</code> / <code>"dvd"</code> / <code>"ipod"</code></h2>
+<p class="ru">Медиаплееры. Событие отправляется с <code>this.uiaId</code> — компонент определяется именем активного приложения.</p>
+<p class="en">Media players. Events sent with <code>this.uiaId</code> — component resolved to the active app name at runtime.</p>
+
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SelectSource</td><td class="par">—</td><td class="desc ru">Переключиться на данный источник медиа.</td><td class="desc en">Switch to this media source.</td></tr>
+  <tr><td class="ev">SelectTrack</td><td class="par"><code>{ payload: { trackId: … } }</code></td><td class="desc ru">Воспроизвести конкретный трек по ID.</td><td class="desc en">Play a specific track by ID.</td></tr>
+  <tr><td class="ev">SelectTrackList</td><td class="par">—</td><td class="desc ru">Открыть список треков текущего альбома/папки.</td><td class="desc en">Open track list for current album/folder.</td></tr>
+  <tr><td class="ev">SelectTrackNumber</td><td class="par"><code>{ payload: { index: … } }</code></td><td class="desc ru">Перейти к треку по порядковому номеру в списке.</td><td class="desc en">Jump to track by index in the list.</td></tr>
+  <tr><td class="ev">SelectFolder / BrowseFolder</td><td class="par"><code>{ payload: { folderId: …, folderName: "…" } }</code></td><td class="desc ru">Открыть/перейти в папку. Показывает содержимое папки на экране.</td><td class="desc en">Open / navigate into a folder. Shows folder contents.</td></tr>
+  <tr><td class="ev">SelectRootFolder</td><td class="par">—</td><td class="desc ru">Перейти в корневую папку носителя.</td><td class="desc en">Navigate to root folder of the media device.</td></tr>
+  <tr><td class="ev">BrowseAll</td><td class="par">—</td><td class="desc ru">Просмотреть все медиафайлы без фильтрации.</td><td class="desc en">Browse all media files without filtering.</td></tr>
+  <tr><td class="ev">BrowseArtistGUI</td><td class="par"><code>{ payload: { artistName: "…", artistId: … } }</code></td><td class="desc ru">Просмотреть альбомы исполнителя.</td><td class="desc en">Browse albums of an artist.</td></tr>
+  <tr><td class="ev">BrowseAlbumArtist</td><td class="par"><code>{ payload: { albumName: "…", albumId: … } }</code></td><td class="desc ru">Просмотреть треки альбома конкретного исполнителя.</td><td class="desc en">Browse tracks of an album by artist.</td></tr>
+  <tr><td class="ev">BrowseGenre</td><td class="par"><code>{ payload: { genreName: "…", genreId: … } }</code></td><td class="desc ru">Просмотреть медиа по жанру.</td><td class="desc en">Browse media by genre.</td></tr>
+  <tr><td class="ev">BrowsePlaylist</td><td class="par"><code>{ payload: { playlistName: "…", playlistId: … } }</code></td><td class="desc ru">Просмотреть плейлист.</td><td class="desc en">Browse a playlist.</td></tr>
+  <tr><td class="ev">BrowsePodcast</td><td class="par"><code>{ payload: { podcastName: "…", podcastId: … } }</code></td><td class="desc ru">Просмотреть список эпизодов подкаста.</td><td class="desc en">Browse podcast episodes.</td></tr>
+  <tr><td class="ev">BrowseAudiobook</td><td class="par"><code>{ payload: { audiobookName: "…", audiobookId: … } }</code></td><td class="desc ru">Просмотреть главы аудиокниги.</td><td class="desc en">Browse audiobook chapters.</td></tr>
+  <tr><td class="ev">PlaySongIndex</td><td class="par"><code>{ payload: { index: … } }</code></td><td class="desc ru">Воспроизвести трек по индексу в текущем списке воспроизведения.</td><td class="desc en">Play a song by its index in the current playlist.</td></tr>
+  <tr><td class="ev">PlayPlaylist / PlayGenre / PlayPodcast</td><td class="par"><code>{ payload: { …Id: … } }</code></td><td class="desc ru">Начать воспроизведение плейлиста, жанра или подкаста.</td><td class="desc en">Start playback of a playlist, genre, or podcast.</td></tr>
+  <tr><td class="ev">PlayNext / PlayPrevious</td><td class="par">—</td><td class="desc ru">Следующий/предыдущий трек в очереди.</td><td class="desc en">Skip to next/previous track in queue.</td></tr>
+  <tr><td class="ev">PlaybackJumpToPosition</td><td class="par"><code>{ payload: { positionMs: … } }</code></td><td class="desc ru">Перемотать трек к указанной позиции (в миллисекундах).</td><td class="desc en">Seek to position in track (milliseconds).</td></tr>
+  <tr><td class="ev">SelectPlayPause</td><td class="par">—</td><td class="desc ru">Переключить воспроизведение/паузу.</td><td class="desc en">Toggle play/pause.</td></tr>
+  <tr><td class="ev">Repeat</td><td class="par">—</td><td class="desc ru">Циклически переключить режим повтора: Нет → Трек → Все.</td><td class="desc en">Cycle through repeat modes: None → Track → All.</td></tr>
+  <tr><td class="ev">Shuffle</td><td class="par">—</td><td class="desc ru">Включить/выключить случайный порядок воспроизведения.</td><td class="desc en">Toggle shuffle mode.</td></tr>
+  <tr><td class="ev">Skip</td><td class="par">—</td><td class="desc ru">Пропустить текущий трек (используется в Pandora/Aha с учётом лимита пропусков).</td><td class="desc en">Skip current track (used in Pandora/Aha, subject to skip limits).</td></tr>
+  <tr><td class="ev">ForcedSeekNextStart / Stop</td><td class="par">—</td><td class="desc ru">Начать/остановить ускоренную перемотку вперёд (удержание кнопки).</td><td class="desc en">Start/stop fast-forward (button hold).</td></tr>
+  <tr><td class="ev">ForcedSeekPreviousStart / Stop</td><td class="par">—</td><td class="desc ru">Начать/остановить ускоренную перемотку назад.</td><td class="desc en">Start/stop rewind (button hold).</td></tr>
+  <tr><td class="ev">GetListChunk</td><td class="par"><code>{ payload: { firstIndex: 0, type: … } }</code></td><td class="desc ru">Запросить страницу данных из большого списка (пагинация). Используется при прокрутке длинных списков треков.</td><td class="desc en">Request a page of data from a long list (pagination). Used when scrolling large track lists.</td></tr>
+  <tr><td class="ev">GetSongList</td><td class="par"><code>{ payload: { count: …, offset: … } }</code></td><td class="desc ru">Постраничный запрос списка треков с указанием смещения и количества.</td><td class="desc en">Paginated song list request with offset and count.</td></tr>
+  <tr><td class="ev">BookmarkSong / BookmarkArtist</td><td class="par">—</td><td class="desc ru">Добавить в закладки текущий трек / исполнителя (функция iPod Genius).</td><td class="desc en">Bookmark current track / artist (iPod Genius feature).</td></tr>
+  <tr><td class="ev">GenerateMoreLikeThis</td><td class="par">—</td><td class="desc ru">Создать Genius Playlist на основе текущего трека (iPod).</td><td class="desc en">Generate Genius Playlist based on current track (iPod).</td></tr>
+  <tr><td class="ev">SelectCameraAngle</td><td class="par"><code>{ payload: { angle: … } }</code></td><td class="desc ru">Выбрать угол камеры (DVD с несколькими ракурсами).</td><td class="desc en">Select camera angle (DVD multi-angle).</td></tr>
+  <tr><td class="ev">SelectSubtitleOn / Off</td><td class="par">—</td><td class="desc ru">Включить/выключить субтитры DVD.</td><td class="desc en">Toggle DVD subtitles on/off.</td></tr>
+  <tr><td class="ev">SelectParentLockOn / Off</td><td class="par">—</td><td class="desc ru">Включить/выключить родительский контроль DVD.</td><td class="desc en">Enable/disable DVD parental lock.</td></tr>
+  <tr><td class="ev">SelectParentLockRating</td><td class="par"><code>{ payload: { rating: 1–8 } }</code></td><td class="desc ru">Установить максимальный возрастной рейтинг для DVD (1=G, 8=NC-17).</td><td class="desc en">Set max DVD parental rating (1=G, 8=NC-17).</td></tr>
+  <tr><td class="ev">SelectAspectRatioItem</td><td class="par"><code>{ payload: { ratio: "16:9"|"4:3"|"zoom" } }</code></td><td class="desc ru">Соотношение сторон видео.</td><td class="desc en">Video aspect ratio.</td></tr>
+  <tr><td class="ev">AAUIEntered</td><td class="par">—</td><td class="desc ru">Уведомить MMUI о том, что интерфейс Android Auto активирован и отображается.</td><td class="desc en">Notify MMUI that Android Auto UI is active and displayed.</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="radio">component: <code>"fmradio"</code> / <code>"amradio"</code> / <code>"satradio"</code> / <code>"dab"</code></h2>
+<p class="ru">Радиоприёмники — FM/AM/DAB/SiriusXM. Большинство событий одинаковы для всех типов радио.</p>
+<p class="en">Radio tuners — FM/AM/DAB/SiriusXM. Most events are shared across all radio types.</p>
+
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SelectSource</td><td class="par">—</td><td class="desc ru">Переключиться на данный радиоисточник.</td><td class="desc en">Switch to this radio source.</td></tr>
+  <tr><td class="ev">SelectStation</td><td class="par"><code>{ payload: { frequency: … } }</code></td><td class="desc ru">Настроиться на частоту (FM/AM в кГц или МГц).</td><td class="desc en">Tune to frequency (FM/AM in kHz or MHz).</td></tr>
+  <tr><td class="ev">SelectPresetStation</td><td class="par"><code>{ payload: { preset: 1–6 } }</code></td><td class="desc ru">Вызвать сохранённую станцию по номеру кнопки (1–6).</td><td class="desc en">Recall a saved preset station (1–6).</td></tr>
+  <tr><td class="ev">SelectFavoritesStation</td><td class="par"><code>{ payload: { stationId: … } }</code></td><td class="desc ru">Перейти к избранной станции из списка «Избранное».</td><td class="desc en">Tune to a favourite station from the Favourites list.</td></tr>
+  <tr><td class="ev">SelectStationList</td><td class="par">—</td><td class="desc ru">Открыть список доступных станций (RDS/DAB список).</td><td class="desc en">Open available stations list (RDS/DAB list).</td></tr>
+  <tr><td class="ev">HandleStartScan / HandleStopScan</td><td class="par">—</td><td class="desc ru">Начать/остановить автоматическое сканирование станций.</td><td class="desc en">Start/stop automatic station scan.</td></tr>
+  <tr><td class="ev">StationFrequencyShortPress</td><td class="par">—</td><td class="desc ru">Ручная настройка — шаг по частоте вверх/вниз (как колёсиком).</td><td class="desc en">Manual tune step — increment/decrement frequency.</td></tr>
+  <tr><td class="ev">TuneEvent</td><td class="par"><code>{ payload: { direction: "up"|"down" } }</code></td><td class="desc ru">Настройка вверх или вниз по частоте.</td><td class="desc en">Tune up or down in frequency.</td></tr>
+  <tr><td class="ev">SaveFavorites</td><td class="par">—</td><td class="desc ru">Сохранить текущий список «Избранное».</td><td class="desc en">Save the current Favourites list.</td></tr>
+  <tr><td class="ev">MoveFavorite</td><td class="par"><code>{ payload: { from: …, to: … } }</code></td><td class="desc ru">Изменить порядок станций в «Избранном».</td><td class="desc en">Reorder stations in Favourites.</td></tr>
+  <tr><td class="ev">RenameFavorite</td><td class="par"><code>{ payload: { name: "…" } }</code></td><td class="desc ru">Переименовать избранную станцию.</td><td class="desc en">Rename a favourite station.</td></tr>
+  <tr><td class="ev">FavoriteThis</td><td class="par">—</td><td class="desc ru">Добавить текущую станцию в «Избранное».</td><td class="desc en">Add the current station to Favourites.</td></tr>
+  <tr><td class="ev">SelectHDChannel</td><td class="par"><code>{ payload: { channel: … } }</code></td><td class="desc ru">Выбрать HD Radio субканал (HD1, HD2, HD3…).</td><td class="desc en">Select HD Radio sub-channel (HD1, HD2, HD3…).</td></tr>
+  <tr><td class="ev">SelectHDRadioOn / Off</td><td class="par">—</td><td class="desc ru">Включить/выключить приём HD Radio.</td><td class="desc en">Enable/disable HD Radio reception.</td></tr>
+  <tr><td class="ev">SelectTrafficAlertOn / Off</td><td class="par">—</td><td class="desc ru">Включить/выключить оповещения о дорожных пробках от RDS/HD.</td><td class="desc en">Enable/disable traffic alerts from RDS/HD.</td></tr>
+  <tr><td class="ev">MiniViewOn / MiniViewOff</td><td class="par">—</td><td class="desc ru">Показать/скрыть мини-виджет радио поверх другого приложения.</td><td class="desc en">Show/hide radio mini-widget overlay over another app.</td></tr>
+  <tr><td class="ev">SelectTuneMixChannel</td><td class="par">—</td><td class="desc ru">SiriusXM TuneMix — перейти к персональному каналу смешивания.</td><td class="desc en">SiriusXM TuneMix — navigate to the personal mix channel.</td></tr>
+  <tr><td class="ev">SelectPriorityList</td><td class="par">—</td><td class="desc ru">SiriusXM Priority List — список приоритетных станций.</td><td class="desc en">SiriusXM Priority List — preferred stations list.</td></tr>
+  <tr><td class="ev">ChannellistStatus</td><td class="par"><code>{ payload: { channelListStatus: 0|1 } }</code></td><td class="desc ru">Уведомить MMUI о статусе загрузки списка каналов (0=не загружен, 1=загружен).</td><td class="desc en">Notify MMUI of channel list load status (0=not loaded, 1=loaded).</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="xmdata">component: <code>"xmdata"</code></h2>
+<p class="ru">SiriusXM Connected Services — трафик, погода, цены на топливо, парковки, спортивные результаты, акции.</p>
+<p class="en">SiriusXM Connected Services — traffic, weather, fuel prices, parking, sports scores, stocks.</p>
+
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SelectView</td><td class="par"><code>{ payload: { view: "…" } }</code></td><td class="desc ru">Переключить вкладку/вид в xmdata (Трафик, Погода, Топливо, Парковки, Спорт, Акции).</td><td class="desc en">Switch xmdata tab/view (Traffic, Weather, Fuel, Parking, Sports, Stocks).</td></tr>
+  <tr><td class="ev">ViewFuelListByDisatnceORPrice</td><td class="par"><code>{ payload: { selectedTab: 0|1 } }</code></td><td class="desc ru">Список заправок: сортировка по расстоянию (0) или по цене (1).</td><td class="desc en">Fuel stations list sorted by distance (0) or price (1).</td></tr>
+  <tr><td class="ev">ViewParkingByDistanceORHourlyRate</td><td class="par"><code>{ payload: { selectedTab: 0|1 } }</code></td><td class="desc ru">Список парковок: сортировка по расстоянию (0) или почасовой ставке (1).</td><td class="desc en">Parking lots sorted by distance (0) or hourly rate (1).</td></tr>
+  <tr><td class="ev">SelectGasStationName</td><td class="par"><code>{ payload: { name: "…" } }</code></td><td class="desc ru">Выбрать заправочную станцию для просмотра деталей (цены, адрес).</td><td class="desc en">Select a gas station to view details (prices, address).</td></tr>
+  <tr><td class="ev">SelectParkingName</td><td class="par"><code>{ payload: { name: "…" } }</code></td><td class="desc ru">Выбрать парковку для просмотра деталей.</td><td class="desc en">Select a parking lot to view details.</td></tr>
+  <tr><td class="ev">SelectRouteTo</td><td class="par"><code>{ payload: { … destination … } }</code></td><td class="desc ru">Проложить маршрут к выбранному POI (заправка, парковка, спортивный объект).</td><td class="desc en">Navigate to selected POI (gas station, parking, venue).</td></tr>
+  <tr><td class="ev">SelectSportLeague / SelectSportName / SelectSportTeam</td><td class="par">—</td><td class="desc ru">Выбрать лигу, вид спорта, команду для просмотра результатов и расписания.</td><td class="desc en">Select league, sport, or team to view scores and schedule.</td></tr>
+  <tr><td class="ev">SelectSportGame</td><td class="par">—</td><td class="desc ru">Просмотреть детали конкретного матча (счёт, статистика).</td><td class="desc en">View details of a specific game (score, stats).</td></tr>
+  <tr><td class="ev">SelectEnterForKeyBoard</td><td class="par"><code>{ payload: { stockName: "AAPL" } }</code></td><td class="desc ru">Подтвердить тикер акции, введённый с клавиатуры, для добавления в список наблюдения.</td><td class="desc en">Confirm a stock ticker entered via keyboard to add to watchlist.</td></tr>
+  <tr><td class="ev">SelectRemoveStocks</td><td class="par">—</td><td class="desc ru">Удалить акцию из списка наблюдения.</td><td class="desc en">Remove a stock from the watchlist.</td></tr>
+  <tr><td class="ev">SelectWeatherSecurityAlert</td><td class="par">—</td><td class="desc ru">Открыть детали погодного оповещения безопасности (шторм, торнадо и т.д.).</td><td class="desc en">Open weather security alert details (storm, tornado warning, etc.).</td></tr>
+  <tr><td class="ev">ToggleWSAlertNotifications</td><td class="par">—</td><td class="desc ru">Включить/выключить всплывающие погодные оповещения.</td><td class="desc en">Toggle weather alert pop-up notifications.</td></tr>
+  <tr><td class="ev">SelectLBSTab</td><td class="par">—</td><td class="desc ru">Открыть вкладку Location-Based Services (LBS).</td><td class="desc en">Open the Location-Based Services (LBS) tab.</td></tr>
+  <tr><td class="ev">ChangeContextToXMParking</td><td class="par"><code>{ … }</code></td><td class="desc ru">Переключить контекст MMUI на экран парковок XM.</td><td class="desc en">Switch MMUI context to the XM Parking screen.</td></tr>
+  <tr><td class="ev">SelectXMFuelSettings</td><td class="par">—</td><td class="desc ru">Открыть настройки фильтрации заправок (тип топлива, сети).</td><td class="desc en">Open fuel filter settings (fuel type, networks).</td></tr>
+  <tr><td class="ev">SelectXMWeatherRecentCities</td><td class="par">—</td><td class="desc ru">Открыть список недавно просмотренных городов в прогнозе погоды.</td><td class="desc en">Open recently viewed cities in weather forecast.</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="vdt">component: <code>"vdt"</code></h2>
+<p class="ru">Vehicle Data Tracker — журнал поездок, отчёты о расходе топлива, диагностические данные автомобиля.</p>
+<p class="en">Vehicle Data Tracker — trip log, fuel consumption reports, vehicle diagnostic data.</p>
+
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">SelectCDCSetting</td><td class="par">—</td><td class="desc ru">Открыть настройки CD-чейнджера (CDC) из контекста VDT.</td><td class="desc en">Open CD changer (CDC) settings from VDT context.</td></tr>
+  <tr><td class="ev">SelectClearLogData</td><td class="par">—</td><td class="desc ru">Очистить сохранённый журнал поездок (данные о расстоянии, расходе, маршрутах).</td><td class="desc en">Clear the saved trip log (distance, fuel consumption, route data).</td></tr>
+  <tr><td class="ev">SetProtectFilesOnOff</td><td class="par"><code>{ payload: { enabled: true|false } }</code></td><td class="desc ru">Включить/выключить защиту файлов журнала от перезаписи. При включении старые записи не удаляются при заполнении памяти.</td><td class="desc en">Enable/disable trip log file protection from overwrite. When on, old records are not deleted when storage is full.</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="navi">component: <code>"emnavi"</code></h2>
+<p class="ru">Навигационное приложение — маршруты, карта, POI, избранные адреса, HUD.</p>
+<p class="en">Navigation app — routes, map, POI, saved addresses, HUD integration.</p>
+
+<table>
+  <tr><th>eventName</th><th>params</th><th class="ru">Описание · Влияние</th><th class="en">Description · Effect</th></tr>
+  <tr><td class="ev">IntentNowPlayingScreen</td><td class="par">—</td><td class="desc ru">Вернуться на экран «Сейчас играет» / карту навигации.</td><td class="desc en">Return to the navigation now-playing / map screen.</td></tr>
+  <tr><td class="ev">SelectMap</td><td class="par">—</td><td class="desc ru">Открыть полноэкранную карту.</td><td class="desc en">Open full-screen map view.</td></tr>
+  <tr><td class="ev">SelectHome</td><td class="par">—</td><td class="desc ru">Проложить маршрут к сохранённому домашнему адресу.</td><td class="desc en">Route to the saved Home address.</td></tr>
+  <tr><td class="ev">SelectFavoritesAddress</td><td class="par"><code>{ payload: { … } }</code></td><td class="desc ru">Проложить маршрут к адресу из «Избранного».</td><td class="desc en">Route to a favourite saved address.</td></tr>
+  <tr><td class="ev">SelectDetailsAddress</td><td class="par"><code>{ payload: { … } }</code></td><td class="desc ru">Начать навигацию к адресу POI (из результатов поиска).</td><td class="desc en">Navigate to a POI address from search results.</td></tr>
+  <tr><td class="ev">SelectDetailsNumber</td><td class="par"><code>{ payload: { number: "…" } }</code></td><td class="desc ru">Позвонить по телефону POI (передаёт номер в phone-приложение).</td><td class="desc en">Call the POI's phone number (passes number to the phone app).</td></tr>
+  <tr><td class="ev">SelectEditHome / SelectDeleteHome</td><td class="par">—</td><td class="desc ru">Редактировать или удалить сохранённый домашний адрес.</td><td class="desc en">Edit or delete the saved Home address.</td></tr>
+  <tr><td class="ev">SelectNearestCity / SelectCity</td><td class="par"><code>{ payload: { city: "…" } }</code></td><td class="desc ru">Найти ближайший город / перейти к конкретному городу.</td><td class="desc en">Find nearest city / navigate to a specific city.</td></tr>
+  <tr><td class="ev">SelectState</td><td class="par"><code>{ payload: { state: "…" } }</code></td><td class="desc ru">Фильтровать поиск по штату/региону (для США/Канады).</td><td class="desc en">Filter search by state/region (US/Canada).</td></tr>
+  <tr><td class="ev">SelectHUDNavigation</td><td class="par">—</td><td class="desc ru">Включить/выключить отображение навигационных подсказок на проекционном дисплее.</td><td class="desc en">Toggle navigation guidance display on the HUD.</td></tr>
+  <tr><td class="ev">SelectHUDNavigationScreen</td><td class="par">—</td><td class="desc ru">Открыть экран настроек HUD-навигации.</td><td class="desc en">Open HUD navigation settings screen.</td></tr>
+  <tr><td class="ev">SelectHUDStreet</td><td class="par">—</td><td class="desc ru">Переключить отображение названия улицы на HUD.</td><td class="desc en">Toggle street name display on HUD.</td></tr>
+  <tr><td class="ev">preparingStucked</td><td class="par">—</td><td class="desc ru">GUI уведомляет MMUI, что инициализация навигационного движка зависла при подготовке карт. MMUI показывает экран ошибки с предложением перезапустить навигацию.</td><td class="desc en">GUI notifies MMUI that the navigation engine is stuck during map preparation. MMUI shows an error screen with an option to restart navigation.</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="uiaId"><span class="ru">this.uiaId — маппинг приложений</span><span class="en">this.uiaId — app mapping</span></h2>
+<p class="ru">Большинство событий конкретного приложения отправляется с <code>this.uiaId</code> в качестве компонента. <code>uiaId</code> совпадает с именем папки в <code>/jci/gui/apps/</code>.</p>
+<p class="en">Most app-specific events use <code>this.uiaId</code> as the component. The uiaId matches the folder name in <code>/jci/gui/apps/</code>.</p>
+
+<pre><span class="s">"diag"</span>          → apps/diag/          <span class="c ru">// диагностика</span><span class="c en">// diagnostics</span>
+<span class="s">"syssettings"</span>   → apps/syssettings/   <span class="c ru">// системные настройки</span><span class="c en">// system settings</span>
+<span class="s">"audiosettings"</span> → apps/audiosettings/ <span class="c ru">// настройки звука</span><span class="c en">// audio settings</span>
+<span class="s">"vehsettings"</span>   → apps/vehsettings/   <span class="c ru">// настройки автомобиля</span><span class="c en">// vehicle settings</span>
+<span class="s">"schedmaint"</span>    → apps/schedmaint/    <span class="c ru">// техобслуживание</span><span class="c en">// scheduled maintenance</span>
+<span class="s">"phone"</span>         → apps/phone/         <span class="c ru">// телефон</span><span class="c en">// phone</span>
+<span class="s">"contacts"</span>      → apps/contacts/      <span class="c ru">// контакты</span><span class="c en">// contacts</span>
+<span class="s">"sms"</span>           → apps/sms/           <span class="c ru">// SMS</span><span class="c en">// SMS</span>
+<span class="s">"email"</span>         → apps/email/         <span class="c ru">// email</span><span class="c en">// email</span>
+<span class="s">"btpairing"</span>     → apps/btpairing/     <span class="c ru">// сопряжение Bluetooth</span><span class="c en">// Bluetooth pairing</span>
+<span class="s">"fmradio"</span>       → apps/fmradio/       <span class="c ru">// FM радио</span><span class="c en">// FM radio</span>
+<span class="s">"amradio"</span>       → apps/amradio/       <span class="c ru">// AM радио</span><span class="c en">// AM radio</span>
+<span class="s">"satradio"</span>      → apps/satradio/      <span class="c ru">// SiriusXM аудио</span><span class="c en">// SiriusXM audio</span>
+<span class="s">"xmdata"</span>        → apps/xmdata/        <span class="c ru">// SiriusXM сервисы данных</span><span class="c en">// SiriusXM data services</span>
+<span class="s">"xmaudio"</span>       → apps/xmaudio/
+<span class="s">"dab"</span>           → apps/dab/           <span class="c ru">// DAB цифровое радио</span><span class="c en">// DAB digital radio</span>
+<span class="s">"usbaudio"</span>      → apps/usbaudio/      <span class="c ru">// USB медиаплеер</span><span class="c en">// USB media player</span>
+<span class="s">"btaudio"</span>       → apps/btaudio/       <span class="c ru">// Bluetooth аудио</span><span class="c en">// Bluetooth audio</span>
+<span class="s">"aharadio"</span>      → apps/aharadio/      <span class="c ru">// Aha Radio стриминг</span><span class="c en">// Aha Radio streaming</span>
+<span class="s">"pandora"</span>       → apps/pandora/       <span class="c ru">// Pandora стриминг</span><span class="c en">// Pandora streaming</span>
+<span class="s">"stitcher"</span>      → apps/stitcher/      <span class="c ru">// Stitcher подкасты</span><span class="c en">// Stitcher podcasts</span>
+<span class="s">"cd"</span>            → apps/cd/            <span class="c ru">// CD плеер</span><span class="c en">// CD player</span>
+<span class="s">"dvd"</span>           → apps/dvd/           <span class="c ru">// DVD плеер</span><span class="c en">// DVD player</span>
+<span class="s">"tv"</span>            → apps/tv/            <span class="c ru">// ТВ тюнер</span><span class="c en">// TV tuner</span>
+<span class="s">"emnavi"</span>        → apps/emnavi/        <span class="c ru">// навигация</span><span class="c en">// navigation</span>
+<span class="s">"vdt"</span>           → apps/vdt/           <span class="c ru">// Vehicle Data Tracker / журнал поездок</span><span class="c en">// Vehicle Data Tracker / drive log</span>
+<span class="s">"vsm"</span>           → apps/vsm/           <span class="c ru">// Vehicle System Monitor</span><span class="c en">// Vehicle System Monitor</span>
+<span class="s">"ecoenergy"</span>     → apps/ecoenergy/     <span class="c ru">// экономия топлива</span><span class="c en">// fuel economy</span>
+<span class="s">"tutorial"</span>      → apps/tutorial/      <span class="c ru">// обучение</span><span class="c en">// tutorial</span>
+<span class="s">"warnguide"</span>     → apps/warnguide/     <span class="c ru">// предупреждения</span><span class="c en">// warning guide</span>
+<span class="s">"mobile911"</span>     → apps/mobile911/     <span class="c ru">// экстренный вызов</span><span class="c en">// emergency call</span>
+<span class="s">"carplay"</span>       → apps/carplay/       <span class="c ru">// Apple CarPlay</span><span class="c en">// Apple CarPlay</span>
+<span class="s">"androidauto"</span>   → apps/androidauto/   <span class="c ru">// Android Auto</span><span class="c en">// Android Auto</span></pre>
+
+<footer>
+  Mazda Connect CMU · firmware v70.00.335C / v74.00.324A ·
+  <a href="https://github.com/PushkinTyt/mzd-connect-design-demo">GitHub</a>
+</footer>
+
+</div>
+
+<script>
+function setLang(lang) {
+  document.documentElement.lang = lang;
+  document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  localStorage.setItem('cmudocs_lang', lang);
+}
+// Restore saved preference
+(function() {
+  var saved = localStorage.getItem('cmudocs_lang');
+  if (saved && saved !== 'ru') setLang(saved);
+})();
+</script>
+</body>
+</html>

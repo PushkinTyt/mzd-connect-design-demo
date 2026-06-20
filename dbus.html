@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mazda CMU — Native Services &amp; DBus Reference</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0a0b0d; --surface: #111318; --border: #1e2330;
+    --text: #e2e8f0; --muted: #64748b; --accent: #22d3ee;
+    --blue: #3b82f6; --green: #22c55e; --amber: #f59e0b; --purple: #a78bfa;
+  }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.7; }
+  .layout { max-width: 980px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2.5rem; }
+  a.back { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); text-decoration: none; font-size: 0.85rem; transition: color .15s; }
+  a.back:hover { color: var(--text); }
+  .lang-switch { display: flex; gap: 4px; }
+  .lang-btn { background: #111318; border: 1px solid #1e2330; color: #64748b; font-size: 0.78rem; font-weight: 600; padding: 4px 10px; border-radius: 6px; cursor: pointer; transition: all .15s; }
+  .lang-btn.active { background: rgba(34,211,238,.1); border-color: var(--accent); color: var(--accent); }
+  .lang-btn:hover:not(.active) { border-color: #334155; color: #94a3b8; }
+  .hero h1 { font-size: 1.9rem; font-weight: 700; letter-spacing: -0.03em; color: #f8fafc; line-height: 1.2; margin-bottom: .6rem; }
+  .hero p { color: var(--muted); font-size: 0.9rem; margin-bottom: 2.5rem; }
+  code { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.82rem; background: #0d1117; border: 1px solid #1e2330; border-radius: 4px; padding: 1px 5px; color: var(--accent); }
+  pre { font-family: 'JetBrains Mono', 'Fira Code', monospace; font-size: 0.82rem; background: #0d1117; border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; overflow-x: auto; color: #94a3b8; margin: 1rem 0 1.5rem; line-height: 1.6; }
+  pre .c  { color: #475569; }
+  pre .k  { color: var(--blue); }
+  pre .s  { color: var(--green); }
+  pre .p  { color: var(--amber); }
+  pre .t  { color: var(--purple); }
+  h2 { font-size: 1.12rem; font-weight: 600; color: #f1f5f9; margin: 2.8rem 0 .3rem; padding-bottom: .4rem; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 0.88rem; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: .06em; margin: 1.6rem 0 .5rem; }
+  p { color: #94a3b8; font-size: 0.88rem; margin-bottom: .75rem; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; margin: .5rem 0 1.5rem; }
+  th { background: #0d1117; color: #64748b; font-weight: 600; font-size: 0.72rem; text-transform: uppercase; letter-spacing: .07em; padding: .5rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+  td { padding: .55rem 1rem; border-bottom: 1px solid #161b27; color: #94a3b8; vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.nm  { color: #e2e8f0; font-family: 'JetBrains Mono','Fira Code',monospace; font-size: 0.79rem; white-space: nowrap; }
+  td.ty  { color: var(--amber); font-family: 'JetBrains Mono','Fira Code',monospace; font-size: 0.76rem; }
+  td.sig { color: var(--green); font-family: 'JetBrains Mono','Fira Code',monospace; font-size: 0.76rem; }
+  td.desc { color: #94a3b8; }
+  td.port { color: var(--accent); font-family: 'JetBrains Mono','Fira Code',monospace; font-size: 0.79rem; white-space: nowrap; }
+  .badge { display: inline-flex; align-items: center; font-size: 0.72rem; font-weight: 600; padding: 2px 8px; border-radius: 4px; margin-left: 8px; vertical-align: middle; }
+  .badge-async  { background: rgba(59,130,246,.15); color: #60a5fa; }
+  .badge-sync   { background: rgba(34,197,94,.15);  color: #4ade80; }
+  .badge-signal { background: rgba(167,139,250,.15); color: #a78bfa; }
+  .toc { display: flex; flex-wrap: wrap; gap: .5rem; margin-bottom: 2.5rem; }
+  .toc a { font-size: 0.79rem; color: #475569; text-decoration: none; background: #111318; border: 1px solid #1e2330; border-radius: 6px; padding: 4px 10px; transition: border-color .15s, color .15s; }
+  .toc a:hover { border-color: #334155; color: #94a3b8; }
+  .arch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin: 1rem 0 2rem; }
+  .arch-card { background: #111318; border: 1px solid #1e2330; border-radius: 12px; padding: 1.2rem 1.4rem; }
+  .arch-card h4 { font-size: 0.82rem; font-weight: 600; color: #f1f5f9; margin-bottom: .4rem; }
+  .arch-card p  { font-size: 0.79rem; color: #64748b; margin: 0; line-height: 1.5; }
+  .arch-card .port-badge { display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--accent); background: rgba(34,211,238,.08); border: 1px solid rgba(34,211,238,.2); border-radius: 4px; padding: 1px 6px; margin-top: 6px; }
+  footer { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); font-size: 0.78rem; color: #334155; }
+  footer a { color: #475569; text-decoration: none; }
+  .en { display: none; }
+  html[lang="en"] .ru { display: none; }
+  html[lang="en"] .en { display: revert; }
+</style>
+</head>
+<body>
+<div class="layout">
+
+<div class="topbar">
+  <a class="back" href="index.html">← <span class="ru">На главную</span><span class="en">Back to index</span></a>
+  <div class="lang-switch">
+    <button class="lang-btn active" id="btn-ru" onclick="setLang('ru')">RU</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
+</div>
+
+<div class="hero">
+  <h1><span class="ru">Нативные сервисы CMU — DBus Reference</span><span class="en">CMU Native Services — DBus Reference</span></h1>
+  <p class="ru">Mazda Connect CMU · Прошивка v70/v74 · Архитектура сервисов, DBus-интерфейсы, порты, сигнатуры методов</p>
+  <p class="en">Mazda Connect CMU · Firmware v70/v74 · Service architecture, DBus interfaces, ports, method signatures</p>
+</div>
+
+<div class="toc">
+  <a href="#arch"><span class="ru">Архитектура</span><span class="en">Architecture</span></a>
+  <a href="#testdiag">com.jci.testdiag</a>
+  <a href="#updatea">com.jci.UPDATEA</a>
+  <a href="#guimgr">com.jci.guiManager</a>
+  <a href="#vbs">VBS (radio / audio / diag)</a>
+  <a href="#audio">Audio Manager</a>
+  <a href="#sm">Service Manager</a>
+  <a href="#jcidbus">JCIDBUS API</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="arch"><span class="ru">Архитектура IPC</span><span class="en">IPC Architecture</span></h2>
+<p class="ru">CMU использует два транспорта: <strong>WebSocket</strong> для GUI ↔ MMUI и <strong>DBus</strong> для взаимодействия между нативными сервисами. Все сервисы управляются Service Manager (<code>sm_svclauncher</code>).</p>
+<p class="en">CMU uses two transports: <strong>WebSocket</strong> for GUI ↔ MMUI and <strong>DBus</strong> for native service IPC. All services are managed by the Service Manager (<code>sm_svclauncher</code>).</p>
+
+<div class="arch-grid">
+  <div class="arch-card">
+    <h4>MMUI — GUI State Machine</h4>
+    <p class="ru">Получает события от GUI и переключает контексты приложений</p>
+    <p class="en">Receives GUI events and switches application contexts</p>
+    <span class="port-badge">ws://127.0.0.1:2700 · ihu-guiifm-protocol</span>
+  </div>
+  <div class="arch-card">
+    <h4>AppSDK — Data Channel</h4>
+    <p class="ru">Канал данных: передаёт обновления состояния от сервисов в GUI</p>
+    <p class="en">Data channel: delivers state updates from services to the GUI</p>
+    <span class="port-badge">ws://127.0.0.1:2800 · ihu-appsdk-protocol</span>
+  </div>
+  <div class="arch-card">
+    <h4>DBAPI — SQLite Bridge</h4>
+    <p class="ru">Доступ к базам данных (контакты, настройки, журнал)</p>
+    <p class="en">Database access (contacts, settings, trip log)</p>
+    <span class="port-badge">ws://127.0.0.1:2766 · ihu-dbapi-protocol</span>
+  </div>
+  <div class="arch-card">
+    <h4>TestDiag — Diagnostics</h4>
+    <p class="ru">Диагностические тесты, DTC-коды, JCI Service Mode</p>
+    <p class="en">Diagnostic tests, DTC codes, JCI Service Mode</p>
+    <span class="port-badge">DBus · com.jci.testdiag</span>
+  </div>
+  <div class="arch-card">
+    <h4>UpdateAgent — Firmware Update</h4>
+    <p class="ru">Поиск, валидация и установка пакетов прошивки (.up)</p>
+    <p class="en">Search, validate and install firmware update packages (.up)</p>
+    <span class="port-badge">DBus · com.jci.UPDATEA_Sys_Ipc.Interface</span>
+  </div>
+  <div class="arch-card">
+    <h4>Audio Manager</h4>
+    <p class="ru">Управление аудиоисточниками, микшером и усилителем</p>
+    <p class="en">Manages audio sources, mixer and amplifier</p>
+    <span class="port-badge">DBus · unix:/tmp/dbus_service_socket</span>
+  </div>
+  <div class="arch-card">
+    <h4>VBS — Vehicle Bus Services</h4>
+    <p class="ru">Мост между HMI и TAU (тюнер, диагностика, навигация CAN)</p>
+    <p class="en">Bridge between HMI and TAU (tuner, diagnostics, navigation CAN)</p>
+    <span class="port-badge">DBus · com.jci.vbs.*</span>
+  </div>
+  <div class="arch-card">
+    <h4>SSH Daemon</h4>
+    <p class="ru">Запускается всегда при загрузке через <code>start_network.sh</code></p>
+    <p class="en">Always started on boot via <code>start_network.sh</code></p>
+    <span class="port-badge">TCP :36000 · eth0 / eth1 (usb0)</span>
+  </div>
+</div>
+
+<h3><span class="ru">DBus-сокеты</span><span class="en">DBus Sockets</span></h3>
+<table>
+  <tr><th><span class="ru">Сокет</span><span class="en">Socket</span></th><th><span class="ru">Назначение</span><span class="en">Purpose</span></th><th><span class="ru">Кто использует</span><span class="en">Used by</span></th></tr>
+  <tr><td class="port">unix:/tmp/dbus_service_socket</td><td class="desc ru">Системная шина сервисов</td><td class="desc en">System service bus</td><td class="desc ru">audio*, VBS, xsesvc2dbus</td></tr>
+  <tr><td class="port">unix:/tmp/dbus_hmi_socket</td><td class="desc ru">Шина HMI-сервисов</td><td class="desc en">HMI service bus</td><td class="desc ru">audioAmp, nativeguictrl</td></tr>
+  <tr><td class="port">system bus</td><td class="desc ru">Системная D-Bus шина</td><td class="desc en">System D-Bus</td><td class="desc ru">testdiag, updatea, guiManager</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="testdiag"><code>com.jci.testdiag</code></h2>
+<p class="ru">Сервис диагностики. Бинарь: <code>svcjcitestdiag.so</code>. Принимает запросы от MMUI (через WebSocket) и транслирует их в диагностические операции через DBus.</p>
+<p class="en">Diagnostics service. Binary: <code>svcjcitestdiag.so</code>. Receives requests from MMUI (via WebSocket) and translates them into diagnostic operations via DBus.</p>
+
+<h3><span class="ru">Методы</span><span class="en">Methods</span></h3>
+<table>
+  <tr><th><span class="ru">Метод</span><span class="en">Method</span></th><th><span class="ru">Параметры</span><span class="en">Parameters</span></th><th><span class="ru">Возврат</span><span class="en">Returns</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr>
+    <td class="nm">StartRoutine <span class="badge badge-async">async</span></td>
+    <td class="sig">test_id: <span class="t">byte</span></td>
+    <td class="ty">return_value: <span class="t">int</span></td>
+    <td class="desc ru">Запустить диагностическую процедуру по числовому ID</td>
+    <td class="desc en">Start a diagnostic routine by numeric ID</td>
+  </tr>
+  <tr>
+    <td class="nm">ActivateTestMode <span class="badge badge-async">async</span></td>
+    <td class="sig">—</td>
+    <td class="ty">return_value: <span class="t">int</span></td>
+    <td class="desc ru">Активировать режим тестирования (разблокирует расширенные диагностические функции)</td>
+    <td class="desc en">Activate test mode (unlocks extended diagnostic functions)</td>
+  </tr>
+  <tr>
+    <td class="nm">DeactivateTestMode <span class="badge badge-async">async</span></td>
+    <td class="sig">—</td>
+    <td class="ty">return_value: <span class="t">int</span></td>
+    <td class="desc ru">Деактивировать режим тестирования</td>
+    <td class="desc en">Deactivate test mode</td>
+  </tr>
+  <tr>
+    <td class="nm">CommanderInput <span class="badge badge-async">async</span></td>
+    <td class="sig">button_id: <span class="t">int16</span>, button_value: <span class="t">int16</span></td>
+    <td class="ty">return_value: <span class="t">int</span></td>
+    <td class="desc ru">Передать программный ввод кнопки в активную диагностическую процедуру</td>
+    <td class="desc en">Send programmatic button input to the active diagnostic routine</td>
+  </tr>
+  <tr>
+    <td class="nm">StopCommanderRoutine <span class="badge badge-async">async</span></td>
+    <td class="sig">—</td>
+    <td class="ty">return_value: <span class="t">int</span></td>
+    <td class="desc ru">Остановить текущую активную рутину</td>
+    <td class="desc en">Stop the current active routine</td>
+  </tr>
+  <tr>
+    <td class="nm">GetTestInfo <span class="badge badge-async">async</span></td>
+    <td class="sig">—</td>
+    <td class="ty">testInfo: <span class="t">(u, a(u, ay))</span></td>
+    <td class="desc ru">Получить список всех доступных тестов: count + [{testID, testName}]</td>
+    <td class="desc en">Get list of available tests: count + [{testID, testName}]</td>
+  </tr>
+  <tr>
+    <td class="nm">ActivateJCITestMode <span class="badge badge-async">async</span></td>
+    <td class="sig">—</td>
+    <td class="ty">return_value: <span class="t">int</span></td>
+    <td class="desc ru">Войти в расширенный JCI-режим тестирования (заводской уровень)</td>
+    <td class="desc en">Enter extended JCI factory test mode</td>
+  </tr>
+  <tr>
+    <td class="nm">DeactivateJCITestModeMode <span class="badge badge-async">async</span></td>
+    <td class="sig">—</td>
+    <td class="ty">return_value: <span class="t">int</span></td>
+    <td class="desc ru">Выйти из JCI-режима тестирования</td>
+    <td class="desc en">Exit JCI factory test mode</td>
+  </tr>
+  <tr>
+    <td class="nm">NotifyDiagLostFocus <span class="badge badge-async">async</span></td>
+    <td class="sig">—</td>
+    <td class="ty">return_value: <span class="t">int</span></td>
+    <td class="desc ru">Уведомить сервис, что диагностический экран потерял фокус GUI</td>
+    <td class="desc en">Notify the service that the diagnostics screen lost GUI focus</td>
+  </tr>
+  <tr>
+    <td class="nm">GetDiagStatus <span class="badge badge-sync">sync</span></td>
+    <td class="sig">—</td>
+    <td class="ty">status: <span class="t">uint</span> (TESTDIAG_ScreenMode_e_t)</td>
+    <td class="desc ru">Получить текущий режим экрана диагностики синхронно</td>
+    <td class="desc en">Synchronously get the current diagnostics screen mode</td>
+  </tr>
+</table>
+
+<h3><span class="ru">Сигналы</span><span class="en">Signals</span></h3>
+<table>
+  <tr><th><span class="ru">Сигнал</span><span class="en">Signal</span></th><th><span class="ru">Аргументы</span><span class="en">Arguments</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr>
+    <td class="nm">TestRoutineStatus_Response <span class="badge badge-signal">signal</span></td>
+    <td class="sig">test_status: <span class="t">string</span>, test_info: <span class="t">(u,ay)</span>, response_data: <span class="t">(i,ay)</span>, gui_state: <span class="t">(b,(ay),(b,b,b,(b,ay)))</span>, isTUIDataReq: <span class="t">bool</span>, endOfData: <span class="t">bool</span></td>
+    <td class="desc ru">Статус выполнения теста + данные для отображения в GUI</td>
+    <td class="desc en">Test execution status + data payload for GUI rendering</td>
+  </tr>
+  <tr>
+    <td class="nm">NotifyTestMode_Response <span class="badge badge-signal">signal</span></td>
+    <td class="sig">test_mode: <span class="t">uint</span></td>
+    <td class="desc ru">Уведомление о смене режима тестирования</td>
+    <td class="desc en">Notification of test mode change</td>
+  </tr>
+  <tr>
+    <td class="nm">SystemError_Response <span class="badge badge-signal">signal</span></td>
+    <td class="sig">error_id: <span class="t">uint</span> (TESTDIAG_System_Error_e_t), error_status: <span class="t">uint</span></td>
+    <td class="desc ru">Системная ошибка CMU — передаётся в GUI для отображения</td>
+    <td class="desc en">CMU system error — forwarded to GUI for display</td>
+  </tr>
+  <tr>
+    <td class="nm">DVD_SpeedRestriction_Enable <span class="badge badge-signal">signal</span></td>
+    <td class="sig">speed_Restriction_Enable: <span class="t">bool</span></td>
+    <td class="desc ru">Включить/выключить ограничение воспроизведения DVD при движении</td>
+    <td class="desc en">Enable/disable DVD playback restriction while vehicle is moving</td>
+  </tr>
+</table>
+
+<pre><span class="c ru">// Интроспекция через dbus-send (на устройстве):</span><span class="c en">// Introspect via dbus-send (on device):</span>
+dbus-send --system --print-reply \
+  --dest=<span class="s">com.jci.testdiag</span> /com/jci/testdiag \
+  org.freedesktop.DBus.Introspectable.Introspect
+
+<span class="c ru">// Список доступных тестов:</span><span class="c en">// Get list of available tests:</span>
+dbus-send --system --print-reply \
+  --dest=<span class="s">com.jci.testdiag</span> /com/jci/testdiag \
+  <span class="s">com.jci.testdiag.GetTestInfo</span>
+
+<span class="c ru">// Статус экрана (синхронный вызов):</span><span class="c en">// Screen status (synchronous call):</span>
+dbus-send --system --print-reply \
+  --dest=<span class="s">com.jci.testdiag</span> /com/jci/testdiag \
+  <span class="s">com.jci.testdiag.GetDiagStatus</span></pre>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="updatea"><code>com.jci.UPDATEA_Sys_Ipc.Interface</code></h2>
+<p class="ru">Агент обновления прошивки. Бинарь: <code>svcjciupdatea.so</code>. Ищет пакеты обновления (.up) на USB, проверяет подпись, устанавливает, инициирует перезагрузку через BLM_SYSTEM.</p>
+<p class="en">Firmware update agent. Binary: <code>svcjciupdatea.so</code>. Searches for update packages (.up) on USB, verifies signature, installs, then initiates reboot via BLM_SYSTEM.</p>
+
+<h3><span class="ru">Методы</span><span class="en">Methods</span></h3>
+<table>
+  <tr><th><span class="ru">Метод</span><span class="en">Method</span></th><th><span class="ru">Параметры IN</span><span class="en">Parameters IN</span></th><th><span class="ru">Параметры OUT</span><span class="en">Parameters OUT</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr>
+    <td class="nm">Connect <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span></td>
+    <td class="ty">out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Открыть соединение с агентом обновления</td>
+    <td class="desc en">Open a connection to the update agent</td>
+  </tr>
+  <tr>
+    <td class="nm">Disconnect <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span></td>
+    <td class="ty">out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Закрыть соединение</td>
+    <td class="desc en">Close connection</td>
+  </tr>
+  <tr>
+    <td class="nm">GetVersion <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span>, in_versionType: <span class="t">int</span> (UPDATEA_version_type_t)</td>
+    <td class="ty">out_versionType: <span class="t">int</span>, out_version: <span class="t">string</span>, out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Получить строку версии по типу (прошивка CMU, навигация, карты и т.д.)</td>
+    <td class="desc en">Get version string by type (CMU firmware, navigation, maps, etc.)</td>
+  </tr>
+  <tr>
+    <td class="nm">IsPresentFailSafeOS <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span></td>
+    <td class="ty">out_isPresent: <span class="t">bool</span>, out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Проверить наличие резервной ОС (Fail-Safe OS) в разделе прошивки</td>
+    <td class="desc en">Check whether the Fail-Safe OS partition is present</td>
+  </tr>
+  <tr>
+    <td class="nm">SearchForAvailableUPs <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span></td>
+    <td class="ty">out_packageInfo: <span class="t">a(sibs)</span>, out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Найти доступные пакеты обновления на подключённом USB-носителе. Возвращает массив [{name, type, isNew, version}]</td>
+    <td class="desc en">Search for available update packages on connected USB storage. Returns [{name, type, isNew, version}]</td>
+  </tr>
+  <tr>
+    <td class="nm">CancelSearchForUPs <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span></td>
+    <td class="ty">out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Отменить текущий поиск пакетов</td>
+    <td class="desc en">Cancel the current package search</td>
+  </tr>
+  <tr>
+    <td class="nm">ValidateAndDownloadUP <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span>, in_upLocation: <span class="t">string</span></td>
+    <td class="ty">out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Проверить подпись и загрузить пакет обновления по указанному пути</td>
+    <td class="desc en">Verify signature and download update package from the given path</td>
+  </tr>
+  <tr>
+    <td class="nm">CancelValidAndDwnld <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span></td>
+    <td class="ty">out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Отменить загрузку</td>
+    <td class="desc en">Cancel download</td>
+  </tr>
+  <tr>
+    <td class="nm">InstallUP <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span></td>
+    <td class="ty">out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Установить загруженный пакет. После завершения требуется перезагрузка</td>
+    <td class="desc en">Install the downloaded package. Reboot required after completion</td>
+  </tr>
+  <tr>
+    <td class="nm">GetUpdateStatus <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span></td>
+    <td class="ty">out_state: <span class="t">int</span> (UPDATEA_state_type_t), out_progress: <span class="t">uint</span>, out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Текущий статус и прогресс (%) установки</td>
+    <td class="desc en">Current installation state and progress (%)</td>
+  </tr>
+  <tr>
+    <td class="nm">RebootBoard <span class="badge badge-async">async</span></td>
+    <td class="sig">in_connId: <span class="t">uint</span></td>
+    <td class="ty">out_result: <span class="t">int</span>, out_connId: <span class="t">uint</span></td>
+    <td class="desc ru">Инициировать перезагрузку CMU через сервис BLM_SYSTEM</td>
+    <td class="desc en">Initiate CMU reboot via BLM_SYSTEM service</td>
+  </tr>
+</table>
+
+<h3><span class="ru">Сигналы</span><span class="en">Signals</span></h3>
+<table>
+  <tr><th><span class="ru">Сигнал</span><span class="en">Signal</span></th><th><span class="ru">Аргументы</span><span class="en">Arguments</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr>
+    <td class="nm">available_ups_event <span class="badge badge-signal">signal</span></td>
+    <td class="sig">packageInfo: <span class="t">a(sibs)</span>, connId: <span class="t">uint</span></td>
+    <td class="desc ru">Найдены пакеты обновления. Поле структуры: (name, type, isNew, version)</td>
+    <td class="desc en">Update packages found. Struct fields: (name, type, isNew, version)</td>
+  </tr>
+  <tr>
+    <td class="nm">available_autoupdate_event <span class="badge badge-signal">signal</span></td>
+    <td class="sig">packageInfo: <span class="t">(sibs)</span>, connId: <span class="t">uint</span></td>
+    <td class="desc ru">Найден одиночный пакет автообновления</td>
+    <td class="desc en">Single auto-update package found</td>
+  </tr>
+  <tr>
+    <td class="nm">update_status_event <span class="badge badge-signal">signal</span></td>
+    <td class="sig">state: <span class="t">int</span>, progress: <span class="t">uint</span>, result: <span class="t">int</span>, connId: <span class="t">uint</span></td>
+    <td class="desc ru">Изменился статус или прогресс установки</td>
+    <td class="desc en">Installation state or progress changed</td>
+  </tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="guimgr"><code>com.jci.guiManager</code> — Opera Watchdog</h2>
+<p class="ru">Opera JS-плагин (<code>guimanager.so</code>). Следит за работоспособностью GUI: если JavaScript не присылает heartbeat в течение 10 секунд — процесс Opera принудительно завершается и перезапускается.</p>
+<p class="en">Opera JS plugin (<code>guimanager.so</code>). Monitors GUI health: if JavaScript stops sending heartbeats for 10 seconds, the Opera process is killed and restarted.</p>
+
+<h3>JavaScript API (NPAPI)</h3>
+<table>
+  <tr><th><span class="ru">Функция</span><span class="en">Function</span></th><th><span class="ru">Параметры</span><span class="en">Parameters</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr>
+    <td class="nm">javascriptHeartbeat()</td>
+    <td class="sig">—</td>
+    <td class="desc ru">Подтверждение работоспособности GUI. Должен вызываться каждые 5–6 секунд</td>
+    <td class="desc en">GUI liveness confirmation. Must be called every 5–6 seconds</td>
+  </tr>
+  <tr>
+    <td class="nm">forceExit()</td>
+    <td class="sig">—</td>
+    <td class="desc ru">Немедленно завершить процесс Opera (плановое завершение GUI)</td>
+    <td class="desc en">Immediately terminate the Opera process (planned GUI shutdown)</td>
+  </tr>
+  <tr>
+    <td class="nm">overridePluginWatchdogValue(seconds)</td>
+    <td class="sig">seconds: <span class="t">int</span></td>
+    <td class="desc ru">Изменить таймаут watchdog (по умолчанию 10 с). Используется при длительных операциях</td>
+    <td class="desc en">Override watchdog timeout (default 10 s). Used during long operations</td>
+  </tr>
+  <tr>
+    <td class="nm">setWarningLevel(level)</td>
+    <td class="sig">level: <span class="t">int</span></td>
+    <td class="desc ru">Установить уровень предупреждения watchdog</td>
+    <td class="desc en">Set the watchdog warning level</td>
+  </tr>
+</table>
+
+<h3><span class="ru">Временны́е пороги</span><span class="en">Timing Thresholds</span></h3>
+<table>
+  <tr><th><span class="ru">Интервал</span><span class="en">Interval</span></th><th><span class="ru">Событие</span><span class="en">Event</span></th></tr>
+  <tr><td class="port">5–6 с</td><td class="desc ru">Нормальный heartbeat — предупреждений нет</td><td class="desc en">Normal heartbeat — no warnings</td></tr>
+  <tr><td class="port">7–9 с</td><td class="desc ru">Предупреждение — heartbeat задерживается</td><td class="desc en">Warning — heartbeat delayed</td></tr>
+  <tr><td class="port">10 с</td><td class="desc ru">SIGKILL → Opera перезапускается</td><td class="desc en">SIGKILL → Opera restarted</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="vbs">VBS — Vehicle Bus Services</h2>
+<p class="ru">Набор сервисов-мостов между HMI и TAU (Tuner/Audio Unit). Транслируют DBus-вызовы в команды для физических модулей (тюнер, усилитель, CAN-шина автомобиля). Бинари используют единый объектный слой <code>JCIDBUS</code>.</p>
+<p class="en">Bridge services between HMI and TAU (Tuner/Audio Unit). Translate DBus calls into commands for physical modules (tuner, amplifier, vehicle CAN bus). Binaries share the common <code>JCIDBUS</code> object layer.</p>
+
+<h3>com.jci.vbs.radio — <span class="ru">Тюнер (FM / AM / HD / DAB / SiriusXM)</span><span class="en">Tuner (FM / AM / HD / DAB / SiriusXM)</span></h3>
+<table>
+  <tr><th><span class="ru">Метод / Сигнал</span><span class="en">Method / Signal</span></th><th><span class="ru">Тип</span><span class="en">Type</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr><td class="nm">VBS_RADIO_Tune_Request</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Настроиться на частоту (FM/AM/DAB)</td><td class="desc en">Tune to a frequency (FM/AM/DAB)</td></tr>
+  <tr><td class="nm">VBS_RADIO_XM_RelativeTune_Request</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Относительная настройка SiriusXM (шаг вперёд/назад)</td><td class="desc en">SiriusXM relative tune (step forward/back)</td></tr>
+  <tr><td class="nm">VBS_RADIO_SubTunerControl_Request</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Управление дополнительным тюнером (если установлен)</td><td class="desc en">Control secondary tuner (if present)</td></tr>
+  <tr><td class="nm">VBS_RADIO_DAB_Control_Request</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Управление DAB-тюнером (выбор службы, mux)</td><td class="desc en">DAB tuner control (service/mux selection)</td></tr>
+  <tr><td class="nm">VBS_RADIO_Get4ARegionInfo</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Получить региональную информацию (частотные планы)</td><td class="desc en">Get regional info (frequency plans)</td></tr>
+  <tr><td class="nm">VBS_RADIO_HD_RadioErrorStatus_Request</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Запросить статус ошибки HD Radio</td><td class="desc en">Request HD Radio error status</td></tr>
+  <tr><td class="nm">VBS_RADIO_Tuner_Response</td><td class="ty"><span class="ru">сигнал</span><span class="en">signal</span></td><td class="desc ru">Ответ тюнера на команду (частота, статус, RBDS/RDS)</td><td class="desc en">Tuner response (frequency, status, RBDS/RDS data)</td></tr>
+  <tr><td class="nm">VBS_RADIO_SignalInfoChange_Response</td><td class="ty"><span class="ru">сигнал</span><span class="en">signal</span></td><td class="desc ru">Изменение уровня сигнала / качества приёма</td><td class="desc en">Signal level / reception quality change</td></tr>
+  <tr><td class="nm">VBS_RADIO_HD_BER_Status</td><td class="ty"><span class="ru">сигнал</span><span class="en">signal</span></td><td class="desc ru">Bit Error Rate — качество цифрового сигнала HD</td><td class="desc en">Bit Error Rate — HD digital signal quality</td></tr>
+  <tr><td class="nm">VBS_RADIO_XM_RadioStatus_Response</td><td class="ty"><span class="ru">сигнал</span><span class="en">signal</span></td><td class="desc ru">Статус SiriusXM (подписка, уровень сигнала)</td><td class="desc en">SiriusXM status (subscription, signal level)</td></tr>
+  <tr><td class="nm">VBS_RADIO_DAB_Diag_Status</td><td class="ty"><span class="ru">сигнал</span><span class="en">signal</span></td><td class="desc ru">Диагностический статус DAB-модуля</td><td class="desc en">DAB module diagnostic status</td></tr>
+</table>
+
+<h3>com.jci.vbs.audio (VBS_AM) — <span class="ru">Аудиомаршрутизация</span><span class="en">Audio Routing</span></h3>
+<table>
+  <tr><th><span class="ru">Метод / Сигнал</span><span class="en">Method / Signal</span></th><th><span class="ru">Тип</span><span class="en">Type</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr><td class="nm">VBS_AM_SourceSelect</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Переключить активный аудиоисточник (FM, USB, BT, Phone…)</td><td class="desc en">Switch the active audio source (FM, USB, BT, Phone…)</td></tr>
+  <tr><td class="nm">VBS_AM_SetMute</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Заглушить аудиовыход</td><td class="desc en">Mute the audio output</td></tr>
+  <tr><td class="nm">VBS_AM_SetUnMute</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Снять заглушение</td><td class="desc en">Unmute the audio output</td></tr>
+  <tr><td class="nm">VBS_AM_GetMuteStatus</td><td class="ty"><span class="ru">метод</span><span class="en">method</span></td><td class="desc ru">Получить текущий статус mute</td><td class="desc en">Get current mute status</td></tr>
+  <tr><td class="nm">VBS_AM_SourceSelectResponse</td><td class="ty"><span class="ru">сигнал</span><span class="en">signal</span></td><td class="desc ru">Подтверждение переключения источника</td><td class="desc en">Source switch confirmation</td></tr>
+  <tr><td class="nm">VBS_AM_MuteStatus / UnMuteStatus</td><td class="ty"><span class="ru">сигнал</span><span class="en">signal</span></td><td class="desc ru">Уведомление об изменении статуса mute</td><td class="desc en">Mute status change notification</td></tr>
+</table>
+
+<h3>com.jci.vbs.diag — <span class="ru">Диагностика через TAU</span><span class="en">Diagnostics via TAU</span></h3>
+<table>
+  <tr><th><span class="ru">Метод</span><span class="en">Method</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr><td class="nm">VBS_DIAG_ReadAVCFaults_Request</td><td class="desc ru">Прочитать коды неисправностей AV-компонентов</td><td class="desc en">Read AV component fault codes</td></tr>
+  <tr><td class="nm">VBS_DIAG_ReadCMUFaults_Request</td><td class="desc ru">Прочитать DTC-коды самого CMU</td><td class="desc en">Read CMU DTC fault codes</td></tr>
+  <tr><td class="nm">VBS_DIAG_GetFaultStatus_Request</td><td class="desc ru">Статус конкретного DTC</td><td class="desc en">Status of a specific DTC</td></tr>
+  <tr><td class="nm">VBS_DIAG_ClearFaults_HMIRequest</td><td class="desc ru">Очистить DTC-коды по запросу из HMI</td><td class="desc en">Clear DTC codes on HMI request</td></tr>
+  <tr><td class="nm">VBS_DIAG_Routine_Request</td><td class="desc ru">Запустить диагностическую рутину</td><td class="desc en">Start a diagnostic routine</td></tr>
+  <tr><td class="nm">VBS_DIAG_TAU_Vehicle_Info_Data_Request</td><td class="desc ru">Получить VIN и данные автомобиля из TAU</td><td class="desc en">Get VIN and vehicle data from TAU</td></tr>
+  <tr><td class="nm">VBS_DIAG_PermanentDTCLog_Request</td><td class="desc ru">Запрос журнала постоянных DTC</td><td class="desc en">Permanent DTC log request</td></tr>
+  <tr><td class="nm">VBS_DIAG_Session_Notification (signal)</td><td class="desc ru">Уведомление о смене диагностической сессии</td><td class="desc en">Diagnostic session change notification</td></tr>
+  <tr><td class="nm">VBS_DIAG_Vip_Reset_Notification (signal)</td><td class="desc ru">Уведомление о сбросе VIP-модуля</td><td class="desc en">VIP module reset notification</td></tr>
+</table>
+
+<h3>com.jci.vbs.cd — CD / DVD</h3>
+<table>
+  <tr><th><span class="ru">Метод / Сигнал</span><span class="en">Method / Signal</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr><td class="nm">VBS_CD_GetDVDConfigStatus</td><td class="desc ru">Получить конфигурацию DVD-плеера (региональный код, статус диска)</td><td class="desc en">Get DVD player configuration (region code, disc status)</td></tr>
+  <tr><td class="nm">VBS_CD_GetCDTVRoutineTestRespStatus</td><td class="desc ru">Статус ответа на тест-рутину CD/TV</td><td class="desc en">CD/TV test routine response status</td></tr>
+  <tr><td class="nm">VBS_CD_cdDvdConfigStatusResponse (signal)</td><td class="desc ru">Ответ с конфигурацией CD/DVD</td><td class="desc en">CD/DVD config response signal</td></tr>
+</table>
+
+<h3>com.jci.vbs.navi — <span class="ru">Навигационные данные</span><span class="en">Navigation Data</span></h3>
+<table>
+  <tr><th><span class="ru">Метод</span><span class="en">Method</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr><td class="nm">VBS_NAVI_GetVINData</td><td class="desc ru">Получить VIN из навигационного блока</td><td class="desc en">Get VIN from navigation unit</td></tr>
+  <tr><td class="nm">VBS_NAVI_GccConfigMgmtResp (signal)</td><td class="desc ru">Ответ менеджера конфигурации GCC (GPS Calibration Control)</td><td class="desc en">GCC (GPS Calibration Control) configuration manager response</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="audio"><span class="ru">Аудиосервисы</span><span class="en">Audio Services</span></h2>
+<p class="ru">Три Lua-скрипта управляют полным стеком звука. Связь через DBus (<code>/tmp/dbus_service_socket</code> и <code>/tmp/dbus_hmi_socket</code>). Все сервисы запускаются через <code>xsesvc2dbus</code> — мост между XSE и DBus.</p>
+<p class="en">Three Lua scripts manage the full audio stack. Communicate via DBus (<code>/tmp/dbus_service_socket</code> and <code>/tmp/dbus_hmi_socket</code>). All started via <code>xsesvc2dbus</code> — bridge between XSE and DBus.</p>
+
+<table>
+  <tr><th><span class="ru">Сервис</span><span class="en">Service</span></th><th><span class="ru">Бинарь</span><span class="en">Binary</span></th><th>DBus-имя</th><th><span class="ru">Назначение</span><span class="en">Purpose</span></th></tr>
+  <tr>
+    <td class="nm">audio_manager</td>
+    <td class="nm">audioMgr.lua</td>
+    <td class="port">com.xsembedded.service.AudioManagement</td>
+    <td class="desc ru">Менеджер маршрутизации: решает, какой источник звука активен, управляет миксером и приоритетами</td>
+    <td class="desc en">Routing manager: decides which audio source is active, controls mixer and priorities</td>
+  </tr>
+  <tr>
+    <td class="nm">audio_control</td>
+    <td class="nm">audioCtrl.lua</td>
+    <td class="port">com.xse.service.AudioControl</td>
+    <td class="desc ru">Контроллер настроек: бас, ВЧ, фейдер, баланс, авто-громкость</td>
+    <td class="desc en">Settings controller: bass, treble, fader, balance, auto-volume</td>
+  </tr>
+  <tr>
+    <td class="nm">audio_amplifier</td>
+    <td class="nm">audioAmp.lua</td>
+    <td class="port">com.xsembedded.service.AudioAmplifier</td>
+    <td class="desc ru">Управление физическим усилителем (Bose или стандартный): уровни, режим Centerpoint, AudioPilot</td>
+    <td class="desc en">Physical amplifier control (Bose or standard): levels, Centerpoint mode, AudioPilot</td>
+  </tr>
+  <tr>
+    <td class="nm">xsesvc2dbus</td>
+    <td class="nm">/usr/bin/xsesvc2dbus</td>
+    <td class="port">com.xsembedded.service.xsesvc2dbus</td>
+    <td class="desc ru">XSE → DBus мост. Транслирует команды аудиостека в DBus-сообщения</td>
+    <td class="desc en">XSE → DBus bridge. Translates audio stack commands into DBus messages</td>
+  </tr>
+  <tr>
+    <td class="nm">xsesvc2dbus_tau</td>
+    <td class="nm">/usr/bin/xsesvc2dbus</td>
+    <td class="port">com.xsembedded.service.xsesvc2dbus.tau</td>
+    <td class="desc ru">TAU-специфичный вариант моста (для VBS radio)</td>
+    <td class="desc en">TAU-specific bridge variant (for VBS radio)</td>
+  </tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="sm"><span class="ru">Service Manager — порядок запуска</span><span class="en">Service Manager — Startup Order</span></h2>
+<p class="ru">Service Manager (<code>sm_svclauncher</code>, порт 9090) запускает все сервисы строго по зависимостям. Нормальный режим описан в <code>/jci/sm/sm_config.xml</code>.</p>
+<p class="en">Service Manager (<code>sm_svclauncher</code>, port 9090) starts all services in strict dependency order. Normal mode is described in <code>/jci/sm/sm_config.xml</code>.</p>
+
+<table>
+  <tr><th><span class="ru">Этап</span><span class="en">Stage</span></th><th><span class="ru">Сервисы</span><span class="en">Services</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr>
+    <td class="nm">Stage 1</td>
+    <td class="sig">lvds_service, dbus_service, dbus_hmi, nativeguictrl</td>
+    <td class="desc ru">Инфраструктура: LVDS-дисплей, оба DBus-демона, контроллер Wayland-поверхностей</td>
+    <td class="desc en">Infrastructure: LVDS display, both DBus daemons, Wayland surface controller</td>
+  </tr>
+  <tr>
+    <td class="nm"></td>
+    <td class="sig">settings, jciBLMSettings, devices, system_mazda_my14</td>
+    <td class="desc ru">Базовые системные сервисы: хранилище настроек, устройства, BLM_SYSTEM</td>
+    <td class="desc en">Core system services: settings storage, devices, BLM_SYSTEM</td>
+  </tr>
+  <tr>
+    <td class="nm">Stage 2</td>
+    <td class="sig">jcipower, jciMMUI, jciAUDIOSETTINGS, audio_manager, audio_control, audio_amplifier</td>
+    <td class="desc ru">Питание, MMUI (state machine), аудиостек</td>
+    <td class="desc en">Power management, MMUI (state machine), audio stack</td>
+  </tr>
+  <tr>
+    <td class="nm">Stage 3</td>
+    <td class="sig">Opera (GUI), jciAPPSDK, jciDGWS, jciMTSA</td>
+    <td class="desc ru">Браузер Opera (GUI), AppSDK, медиасервисы</td>
+    <td class="desc en">Opera browser (GUI), AppSDK, media services</td>
+  </tr>
+  <tr>
+    <td class="nm">Stage USB</td>
+    <td class="sig">jciUSBMGR, jciUPDATEA</td>
+    <td class="desc ru">USB-менеджер и агент обновлений</td>
+    <td class="desc en">USB manager and update agent</td>
+  </tr>
+  <tr>
+    <td class="nm">Stage BT</td>
+    <td class="sig">jciBCA, jciBTHM</td>
+    <td class="desc ru">Bluetooth-стек: сопряжение, HFP, A2DP</td>
+    <td class="desc en">Bluetooth stack: pairing, HFP, A2DP</td>
+  </tr>
+  <tr>
+    <td class="nm">Stage NAVI</td>
+    <td class="sig">emnavi</td>
+    <td class="desc ru">Навигационный движок</td>
+    <td class="desc en">Navigation engine</td>
+  </tr>
+  <tr>
+    <td class="nm">Stage Network</td>
+    <td class="sig">start_network.sh</td>
+    <td class="desc ru">Настройка сети: eth0 (разработческий режим), wlan0, sshd</td>
+    <td class="desc en">Network setup: eth0 (developer mode), wlan0, sshd</td>
+  </tr>
+</table>
+
+<h3><span class="ru">Параметры SM</span><span class="en">SM Parameters</span></h3>
+<table>
+  <tr><th><span class="ru">Параметр</span><span class="en">Parameter</span></th><th><span class="ru">Значение</span><span class="en">Value</span></th><th><span class="ru">Описание</span><span class="en">Description</span></th></tr>
+  <tr><td class="nm">sm_svclauncher port</td><td class="port">9090</td><td class="desc ru">Порт лаунчера сервисов</td><td class="desc en">Service launcher port</td></tr>
+  <tr><td class="nm">SM client port</td><td class="port">9091</td><td class="desc ru">Порт клиентов SM</td><td class="desc en">SM client port</td></tr>
+  <tr><td class="nm">ping_interval</td><td class="port">10 000 мс</td><td class="desc ru">Интервал проверки живости сервисов</td><td class="desc en">Service liveness ping interval</td></tr>
+  <tr><td class="nm">service ping_timeout</td><td class="port">8 000 мс</td><td class="desc ru">Максимальное время ответа на ping</td><td class="desc en">Max ping response time</td></tr>
+  <tr><td class="nm">system_save_timeout</td><td class="port">55 000 мс</td><td class="desc ru">Время сохранения состояния при выключении</td><td class="desc en">State save timeout during shutdown</td></tr>
+  <tr><td class="nm">sigkill_wait</td><td class="port">30 000 мс</td><td class="desc ru">Ожидание после SIGKILL перед перезагрузкой</td><td class="desc en">Wait after SIGKILL before reboot</td></tr>
+</table>
+
+<!-- ══════════════════════════════════════════════════ -->
+<h2 id="jcidbus">JCIDBUS — <span class="ru">внутренний DBus API</span><span class="en">Internal DBus Wrapper API</span></h2>
+<p class="ru">Все нативные сервисы JCI используют собственную обёртку над D-Bus — библиотеку <code>libjcidbus.so</code>. Она управляет соединением, объектами, методами и сигналами.</p>
+<p class="en">All JCI native services use a proprietary D-Bus wrapper — <code>libjcidbus.so</code>. It manages connections, objects, methods and signals.</p>
+
+<table>
+  <tr><th><span class="ru">Функция</span><span class="en">Function</span></th><th><span class="ru">Назначение</span><span class="en">Purpose</span></th></tr>
+  <tr><td class="nm">JCIDBUS_conn_create / connect / disconnect / free</td><td class="desc ru">Управление жизненным циклом соединения с DBus</td><td class="desc en">DBus connection lifecycle management</td></tr>
+  <tr><td class="nm">JCIDBUS_worker_start / stop</td><td class="desc ru">Запуск/остановка рабочего потока обработки DBus-сообщений</td><td class="desc en">Start/stop DBus message processing worker thread</td></tr>
+  <tr><td class="nm">JCIDBUS_object_create / register</td><td class="desc ru">Создать и зарегистрировать DBus-объект на шине</td><td class="desc en">Create and register a DBus object on the bus</td></tr>
+  <tr><td class="nm">JCIDBUS_obj_interface_create / add_method / add_signal / free</td><td class="desc ru">Создать интерфейс, добавить методы и сигналы</td><td class="desc en">Create interface, add methods and signals</td></tr>
+  <tr><td class="nm">JCIDBUS_obj_method_create / set_callback</td><td class="desc ru">Создать метод и привязать C-колбэк-функцию</td><td class="desc en">Create method and bind a C callback function</td></tr>
+  <tr><td class="nm">JCIDBUS_object_add_introspection</td><td class="desc ru">Добавить XML-интроспекцию к объекту (стандарт org.freedesktop.DBus.Introspectable)</td><td class="desc en">Add XML introspection to the object (org.freedesktop.DBus.Introspectable standard)</td></tr>
+  <tr><td class="nm">JCIDBUS_signal_create / send / free</td><td class="desc ru">Создать, отправить и освободить DBus-сигнал</td><td class="desc en">Create, send and free a DBus signal</td></tr>
+  <tr><td class="nm">JCIDBUS_method_get_args / get_element</td><td class="desc ru">Прочитать аргументы входящего метода</td><td class="desc en">Read incoming method arguments</td></tr>
+  <tr><td class="nm">JCIDBUS_add_*_param (i32, ui32, string, boolean, struct)</td><td class="desc ru">Добавить параметры в ответ или сигнал по типу</td><td class="desc en">Append typed parameters to a reply or signal</td></tr>
+  <tr><td class="nm">JCIDBUS_reply_type</td><td class="desc ru">Установить тип ответа (успех / ошибка)</td><td class="desc en">Set reply type (success / error)</td></tr>
+  <tr><td class="nm">JCIDBUS_elem_get_type / get_byte / get_i16</td><td class="desc ru">Прочитать тип и значение элемента DBus-сообщения</td><td class="desc en">Read type and value of a DBus message element</td></tr>
+</table>
+
+<footer>
+  Mazda Connect CMU · firmware v70.00.335C / v74.00.324A ·
+  <a href="https://github.com/PushkinTyt/mzd-connect-design-demo">GitHub</a>
+</footer>
+
+</div>
+
+<script>
+function setLang(lang) {
+  document.documentElement.lang = lang;
+  document.getElementById('btn-ru').classList.toggle('active', lang === 'ru');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+  localStorage.setItem('cmudocs_lang', lang);
+}
+(function() {
+  var saved = localStorage.getItem('cmudocs_lang');
+  if (saved && saved !== 'ru') setLang(saved);
+})();
+</script>
+</body>
+</html>
